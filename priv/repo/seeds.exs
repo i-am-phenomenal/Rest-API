@@ -10,7 +10,7 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-alias RestApi.TopicsOfInterests
+alias RestApi.TopicOfInterest
 alias RestApi.Repo
 
 topicNames = [
@@ -38,7 +38,7 @@ topicNames = [
 
 topicNames
 |> Enum.map(fn topicName -> 
-    changeset = TopicsOfInterests.changeset(%TopicsOfInterests{}, %{
+    changeset = TopicOfInterest.changeset(%TopicOfInterest{}, %{
         topicName: topicName,
         shortDesc: ""
     })

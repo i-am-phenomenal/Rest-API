@@ -1,4 +1,4 @@
-defmodule RestApi.UserController do
+defmodule RestApiWeb.UserController do
     use RestApiWeb, :controller
     alias ApiContext 
 
@@ -12,7 +12,19 @@ defmodule RestApi.UserController do
 
                     {:error, reason} -> send_resp(conn, 500, reason)
                 end
+        end
+    end
 
+    def addTopicOfInterest(conn, params) do
+        userId = params["user_id"]
+        case ApiContext.checkUserbyId(userId) do
+            true -> case ApiContext.addTopicOfInterestForUser(params, userId) do
+                {:ok, topic} -> render(conn, "user_topic_of_interest.json", resp: topic)
+
+                {:error, reason} -> send_resp(conn, 500, reason)
+            end
+
+            false -> send_resp(conn, 500, "User does not exist !")
         end
     end
 end

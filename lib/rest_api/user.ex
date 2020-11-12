@@ -3,6 +3,7 @@ defmodule RestApi.User do
     import Ecto.Changeset
 
     alias RestApi.Repo 
+    alias RestApi.TopicOfInterest
 
     @primary_key false
     schema "users" do
@@ -12,6 +13,11 @@ defmodule RestApi.User do
         field :password, :string
         field :age, :integer
 
+        many_to_many(
+            :topics_of_interests,
+            TopicOfInterest,
+            join_through: :topics_of_interests
+        )
         timestamps()
     end
 

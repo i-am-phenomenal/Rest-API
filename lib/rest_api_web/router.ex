@@ -20,8 +20,9 @@ defmodule RestApiWeb.Router do
   end
 
   scope "/api/", RestApiWeb do
-    pipe_through :browser
-    post "/sign_up/", UserController, :signUp
+    # pipe_through :browser
+    post "/sign_up", UserController, :signUp
+    post "/users/:user_id/topic_of_interest/", UserController, :addTopicOfInterest
   end
 
   # Other scopes may use custom stacks.
