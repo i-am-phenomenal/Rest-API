@@ -11,6 +11,7 @@ defmodule RestApi.User do
         field :fullName, :string
         field :password, :string
         field :age, :integer
+
         timestamps()
     end
 
