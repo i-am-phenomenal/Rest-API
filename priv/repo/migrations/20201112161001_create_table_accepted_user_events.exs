@@ -1,11 +1,11 @@
-defmodule RestApi.Repo.Migrations.CreateTableAcceptedUserEvents do
+defmodule RestApi.Repo.Migrations.CreateTableUserEventRelationship do
   use Ecto.Migration
 
   def change do
-    create table(:accepted_user_events, primary_key: false) do
+    create table(:user_event_relationships, primary_key: false) do
       add :id, :serial, primary_key: true
-      add :userId, :integer
-      add :eventId, :integer
+      add :userId, references(:users)
+      add :eventId, references(:events)
       add :isAccepted, :boolean
       add :isRejected, :boolean
 

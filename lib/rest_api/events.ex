@@ -16,4 +16,10 @@ defmodule RestApi.Events do
 
         timestamps()
     end
+
+    @doc false
+    def changeset(event, attrs) do
+        event
+        |> cast(attrs, [:eventDescription, :eventType, :eventDate, :eventDuration, :eventHost, :eventLocation])
+    end
 end
