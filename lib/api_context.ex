@@ -1,10 +1,12 @@
 defmodule ApiContext do
 
-    alias RestApi.User
-    alias RestApi.TopicOfInterest
+
     import Ecto.Query, warn: false
     import Ecto
     alias RestApi.Repo 
+    alias RestApi.User
+    alias RestApi.TopicOfInterest
+    alias RestApi.UserTopicsRelationship
 
     def checkIfUserExists(emailId) do
         user = User
@@ -22,14 +24,19 @@ defmodule ApiContext do
         not is_nil(user)
     end
 
-    defp validateType(ageVal) when is_binary(ageVal) do
-        {converted, _} = Integer.parse(ageVal)
+    def getAllUserRecords() do
+        User
+        |> Repo.all()
+    end
+
+    defp validateType(val) when is_binary(val) do
+        {converted, _} = Integer.parse(val)
         converted
     end
 
-    defp validateType(ageVal) when is_number(ageVal), do: ageVal
+    defp validateType(val) when is_number(val), do: val
 
-    defp validateType(_), do: raise "Invalid Type for Age"
+    defp validateType(_), do: raise "Invalid Type for value"
 
     def registerUser(parameters) do
         if Map.has_key?(parameters, "email") and Map.has_key?(parameters, "password") do
@@ -38,8 +45,8 @@ defmodule ApiContext do
                 password: parameters["password"],
                 fullName: parameters["fullName"],
                 age: validateType(parameters["age"]),
-                inserted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-                updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+                inserted_at: currentTime(),
+                updated_at: currentTime()
             }
             |> Repo.insert() 
         else
@@ -47,23 +54,29 @@ defmodule ApiContext do
         end
     end
 
-    def addTopicOfInterestForUser(params, userId) do
-        if Map.has_key?(params, "topicName") and Map.has_key?(params, "shortDesc") do
-            try do 
-                TopicOfInterest.changeset(
-                    %TopicOfInterest{},
-                    %{
-                        topicName: params["topicName"],
-                        shortDesc: params["shortDesc"]
+    def addTopicOfInterestForUser(topicId, userId) do
+        try do 
+            case Repo.get_by(TopicOfInterest, id: topicId) do
+                nil -> 
+                    {:error, "Topic with given Id doesnt exist"}
+
+                topic -> 
+                    %UserTopicsRelationship{
+                        userId: validateType(userId),
+                        topicId: validateType(topicId),
+                        inserted_at: currentTime(),
+                        updated_at: currentTime()
                     }
-                )
-                |> Repo.insert()
-            catch 
-                exception -> 
-                    {:error, exception}
+                    |> Repo.insert()
             end
-        else 
-            {:error, "One or more parameters are missing"}
+        catch 
+            exception -> 
+                {:error, exception}
         end
+    end
+
+    defp currentTime() do
+        NaiveDateTime.utc_now()
+        |> NaiveDateTime.truncate(:second)
     end
 end

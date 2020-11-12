@@ -15,12 +15,23 @@ defmodule RestApiWeb.UserController do
         end
     end
 
+    @doc """
+    Made this API for testing purposes
+    """
+
+    def getAllUsers(conn, _params) do
+        case ApiContext.getAllUserRecords() do
+            {:ok, userRecords} -> render(conn, "all_user_records.json", userRecords: userRecords)
+            {:error, reason} -> send_resp(conn, 500, reason)
+        end
+    end
+
     def addTopicOfInterest(conn, params) do
         userId = params["user_id"]
+        topicId = params["topic_id"]
         case ApiContext.checkUserbyId(userId) do
-            true -> case ApiContext.addTopicOfInterestForUser(params, userId) do
+            true -> case ApiContext.addTopicOfInterestForUser(topicId, userId) do
                 {:ok, topic} -> render(conn, "user_topic_of_interest.json", resp: topic)
-
                 {:error, reason} -> send_resp(conn, 500, reason)
             end
 

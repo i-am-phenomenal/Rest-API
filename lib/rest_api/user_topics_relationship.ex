@@ -8,6 +8,8 @@ defmodule RestApi.UserTopicsRelationship do
     schema "user_topics_relationship" do
         field :id, :integer
         field :userId, :integer
-        #WIP
+        field :topicId, :integer
+
+        timestamps()
     end
 end
