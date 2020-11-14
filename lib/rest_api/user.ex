@@ -13,11 +13,12 @@ defmodule RestApi.User do
         field :password, :string
         field :age, :integer
 
-        many_to_many(
-            :topics_of_interests,
-            TopicOfInterest,
-            join_through: :topics_of_interests
-        )
+        # many_to_many(
+        #     :topics_of_interests,
+        #     TopicOfInterest,
+        #     join_through: :topics_of_interests
+        # )
+        # has_many :topics_of_interests, TopicOfInterest, references: :id
         timestamps()
     end
 

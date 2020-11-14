@@ -9,13 +9,13 @@ defmodule RestApiWeb.UserView do
 
     def render("user_topic_of_interest.json", %{resp: relationship}) do
         %{
-            id: relationship.id,
             userId: relationship.userId,
-            topicId: relationship.topicId
+            topicId: relationship.topicId   
         }
     end
 
     def render("all_user_records.json", %{userRecords: userRecords}) do
+        
         userRecords
         |> Enum.map(fn record -> 
             %{

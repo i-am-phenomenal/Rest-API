@@ -22,6 +22,7 @@ defmodule RestApiWeb.UserController do
     def getAllUsers(conn, _params) do
         case ApiContext.getAllUserRecords() do
             {:ok, userRecords} -> render(conn, "all_user_records.json", userRecords: userRecords)
+            
             {:error, reason} -> send_resp(conn, 500, reason)
         end
     end

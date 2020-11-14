@@ -24,9 +24,40 @@ defmodule ApiContext do
         not is_nil(user)
     end
 
+    defp checkIfUserHasAnyTopics(userId) do
+        Repo.exists(from userTopic in UserTopicsRelationship, where: userTopic.userId == ^userId)
+    end
+
+    defp getAllUserTopics(userId) do
+        queryForAllTopicIds = 
+            from userTopic in UserTopicsRelationship, 
+            where: userTopic.userId == ^userId,
+            select: userTopic.topicId
+
+        topicsIds = Repo.all(queryForAllTopicIds)
+
+    end
+
     def getAllUserRecords() do
-        User
-        |> Repo.all()
+        try do 
+            allUsers = 
+                User
+                |> Repo.all()
+                # |> Repo.preload(:topics_of_interests)
+
+            allUsers
+            |> Enum.map(fn user -> 
+                case checkIfUserHasAnyTopics(user.id) do
+                    false -> 
+                        Map.put(user, :topic_of_interests, [])
+                    true -> 
+                        getAllUserTopics(user.id)
+                end
+            end)
+            {:ok, records}
+        catch 
+            exception -> {:error, exception}
+        end
     end
 
     defp validateType(val) when is_binary(val) do
