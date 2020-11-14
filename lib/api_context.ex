@@ -113,6 +113,55 @@ defmodule ApiContext do
         Repo.delete(query)
     end
 
+    def deleteUserTopicAssociation(userId) do
+        (
+            from userTopicRelationship in UserTopicsRelationship,
+            where: userTopicRelationship.userId == ^userId
+        )
+        |> Repo.delete_all()
+    end
+
+    def deleteUserByEmailId(emailId) do
+        user = 
+            (
+                from user in User,
+                where: user.email == ^emailId,
+                select: user
+            )
+            |> Repo.one()
+
+        deleteUserTopicAssociation(user.id)
+
+        user
+        |> Repo.delete()
+    end
+
+    def updateUserDetails(params) do
+        query = 
+            from user in User, 
+            where: user.email == ^params["email"],
+            select: user
+
+        attrs = %{
+            email: params["email"],
+            password: params["password"],
+            age: params["age"],
+            fullName: params["fullName"],
+            updated_at: currentTime()
+        }
+        
+        try do 
+            Repo.one(query)
+            |> User.changeset(attrs)
+            |> Repo.update()
+
+            :ok
+        catch 
+            exception -> 
+                {:error, exception}
+        end
+    end
+
     def removeUserAndTopicAssociation(userId, topicIdOrName) do
         case Integer.parse(topicIdOrName) do
             # Means that we have topic name

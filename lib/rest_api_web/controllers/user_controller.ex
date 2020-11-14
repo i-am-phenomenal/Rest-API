@@ -1,7 +1,34 @@
 defmodule RestApiWeb.UserController do
     use RestApiWeb, :controller
     alias ApiContext 
+
+    def deleteUserByEmailId(conn, params) do
+        emailId = params["email"]
+        case ApiContext.checkIfUserExists(emailId) do
+            true -> 
+                case ApiContext.deleteUserByEmailId(emailId) do
+                    {:ok, _} -> send_resp(conn, 200, "Delete User with email id #{emailId}")
+                    {:error, reason} -> send_resp(conn, 200, reason)
+                end
+            false -> 
+                send_resp(conn, 500, "User does not exist !")
+        end
+    end
     
+    def updateUserDetails(conn, params) do
+        emailId = params["email"]
+        case ApiContext.checkIfUserExists(emailId) do
+            true -> 
+                case ApiContext.updateUserDetails(params) do
+                    :ok -> send_resp(conn, 200, "Updated User details with email #{emailId}")
+                    {:error, reason} -> send_resp(conn, 500, reason)
+                end
+            
+            false -> 
+                send_resp(conn, 500, "User does not exist !")
+        end
+    end
+
     def signUp(conn, parameters) do
         case ApiContext.checkIfUserExists(parameters["email"]) do
             true -> send_resp(conn, 200, "User with given id already exists")

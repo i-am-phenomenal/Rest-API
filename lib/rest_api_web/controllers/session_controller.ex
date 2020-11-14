@@ -6,14 +6,12 @@ defmodule RestApiWeb.SessionController do
     alias ApiContext
 
     def new(conn, params) do
-        # changeset = ApiContext.getUserChangeset(%User{})
         emailId = params["email"]
         plainTextPassword = params["password"]
         maybeUser = Guardian.Plug.current_resource(conn) 
         if maybeUser do
             redirect(conn, to: "/api/protected")
         else 
-            # ApiContext,authenticateUser(emailId, password)
             send_resp(conn, 200, "ELSE CLAUSE")
         end
     end
