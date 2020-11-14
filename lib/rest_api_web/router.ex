@@ -5,8 +5,8 @@ defmodule RestApiWeb.Router do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_flash
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
+    # plug :protect_from_forgery
+    # plug :put_secure_browser_headers
   end
 
   pipeline :auth do
@@ -26,12 +26,16 @@ defmodule RestApiWeb.Router do
 
     get "/", PageController, :index
 
-    get "/login", SessionController, 
+    get "/login", SessionController,  :new
+    post "/login", SessionController, :login
+    post "/sign_up", UserController, :signUp
+
   end
 
   scope "/api/", RestApiWeb do
-    pipe_through [:browser, :auth]
-    post "/sign_up", UserController, :signUp
+    pipe_through [:browser, :auth, :ensure_auth]
+    # post "/sign_up", UserController, :signUp
+    get "/protected", PageController, :protected
     get "/get_all_users", UserController, :getAllUsers
     get "/get_all_topics", TopicController, :getAllTopics
     post "/users/topic_of_interest/", UserController, :addTopicOfInterest

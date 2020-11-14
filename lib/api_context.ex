@@ -12,10 +12,14 @@ defmodule ApiContext do
         Repo.get_by(User, id: id)
     end
 
+    def getUserChangeset(%User{} = user) do
+        User.changeset(user, %{})
+    end
+
     def authenticateUser(emailId, plainTextPassword) do
         userQuery = 
             from user in User, 
-            where: user.emailId == ^emailId and user.password == ^plainTextPassword
+            where: user.email == ^emailId
          
         case Repo.one(userQuery) do
             nil -> 
@@ -208,7 +212,8 @@ defmodule ApiContext do
 
     def registerUser(parameters) do
         if Map.has_key?(parameters, "email") and Map.has_key?(parameters, "password") do
-             %User{
+             userMap = 
+             %{
                 email: parameters["email"],
                 password: parameters["password"],
                 fullName: parameters["fullName"],
@@ -216,7 +221,9 @@ defmodule ApiContext do
                 inserted_at: currentTime(),
                 updated_at: currentTime()
             }
-            |> Repo.insert() 
+            Repo.insert(
+                User.changeset(%User{}, userMap)
+            ) 
         else
             {:error, "Missing Email or Password field in input"}
         end

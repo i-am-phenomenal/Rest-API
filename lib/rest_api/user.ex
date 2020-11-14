@@ -14,26 +14,22 @@ defmodule RestApi.User do
         field :password, :string
         field :age, :integer
 
-        # many_to_many(
-        #     :topics_of_interests,
-        #     TopicOfInterest,
-        #     join_through: :topics_of_interests
-        # )
-        # has_many :topics_of_interests, TopicOfInterest, references: :id
         timestamps()
     end
 
     @doc false
     def changeset(user, attributes) do
         user
-        |> cast(attributes, [:email, :fullName, :password, :age])
-        |> validate_required(:email, :password)
+        |> cast(attributes, [:email, :fullName, :password, :age, :inserted_at, :updated_at])
+        |> validate_required([:email, :password])
         |> putPasswordHash()
     end
 
     defp putPasswordHash(%Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset) do
-        change(changeset, password: Argon2.hash_pwd_salt(password))
+        put_change(changeset, :password, Argon2.hash_pwd_salt(password))
     end 
 
-    defp putPasswordHash(changeset), do: changeset
+    defp putPasswordHash(changeset) do
+        changeset
+    end
 end
