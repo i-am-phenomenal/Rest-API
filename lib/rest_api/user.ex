@@ -4,6 +4,7 @@ defmodule RestApi.User do
 
     alias RestApi.Repo 
     alias RestApi.TopicOfInterest
+    alias Argon2 
 
     @primary_key false
     schema "users" do
@@ -27,5 +28,12 @@ defmodule RestApi.User do
         user
         |> cast(attributes, [:email, :fullName, :password, :age])
         |> validate_required(:email, :password)
+        |> putPasswordHash()
     end
+
+    defp putPasswordHash(%Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset) do
+        change(changeset, password: Argon2.hash_pwd_salt(password))
+    end 
+
+    defp putPasswordHash(changeset), do: changeset
 end

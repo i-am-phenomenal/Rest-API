@@ -1,12 +1,34 @@
 defmodule ApiContext do
 
-
     import Ecto.Query, warn: false
     import Ecto
     alias RestApi.Repo 
     alias RestApi.User
     alias RestApi.TopicOfInterest
     alias RestApi.UserTopicsRelationship
+    alias Argon2
+
+    def getUserById(id) do
+        Repo.get_by(User, id: id)
+    end
+
+    def authenticateUser(emailId, plainTextPassword) do
+        userQuery = 
+            from user in User, 
+            where: user.emailId == ^emailId and user.password == ^plainTextPassword
+         
+        case Repo.one(userQuery) do
+            nil -> 
+                Argon2.no_user_verify()
+                {:error, :invalid_credentials}
+            user -> 
+                if Argon2.verify_pass(plainTextPassword, user.password) do
+                    {:ok, user}
+                else 
+                    {:error, :invalid_credentials}
+                end
+        end
+    end
 
     def addNewTopicOfInterest(params) do
         if checkIfAllFieldsArePresent?(params) do

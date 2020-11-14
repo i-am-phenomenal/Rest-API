@@ -10,6 +10,10 @@ use Mix.Config
 config :rest_api,
   ecto_repos: [RestApi.Repo]
 
+config :rest_api, RestApi.Guardian,
+  issues: "rest_api",
+  secret_key: "Ehb/hqXICxV3z5xJroC++H9s9vhM5k9xJpWlD3fg5FECC+laHFBZER5fWS3vig3w"
+
 # Configures the endpoint
 config :rest_api, RestApiWeb.Endpoint,
   url: [host: "localhost"],

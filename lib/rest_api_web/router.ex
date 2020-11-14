@@ -9,18 +9,28 @@ defmodule RestApiWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :auth do
+    plug RestApi.Pipeline
+  end
+
+  pipeline :ensure_auth do
+    plug Guardian.Plug.EnsureAuthenticated
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
 
   scope "/", RestApiWeb do
-    pipe_through :browser
+    pipe_through [:browser, :auth]
 
     get "/", PageController, :index
+
+    get "/login", SessionController, 
   end
 
   scope "/api/", RestApiWeb do
-    # pipe_through :browser
+    pipe_through [:browser, :auth]
     post "/sign_up", UserController, :signUp
     get "/get_all_users", UserController, :getAllUsers
     get "/get_all_topics", TopicController, :getAllTopics
