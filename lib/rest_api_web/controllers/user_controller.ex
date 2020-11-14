@@ -18,7 +18,6 @@ defmodule RestApiWeb.UserController do
     @doc """
     Made this API for testing purposes
     """
-
     def getAllUsers(conn, _params) do
         case ApiContext.getAllUserRecords() do
             {:ok, userRecords} -> render(conn, "all_user_records.json", userRecords: userRecords)

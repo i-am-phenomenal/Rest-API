@@ -8,6 +8,46 @@ defmodule ApiContext do
     alias RestApi.TopicOfInterest
     alias RestApi.UserTopicsRelationship
 
+    def addNewTopicOfInterest(params) do
+        if checkIfAllFieldsArePresent?(params) do
+            case checkIfTopicAlreadyPresent?(params) do
+                true -> 
+                    {:error, "Topic Already present"}
+                false -> 
+                    %TopicOfInterest{
+                        topicName: params["topic_name"],
+                        shortDesc: params["short_desc"]
+                    }
+                    |> Repo.insert()
+                    :ok
+            end
+        else 
+            {:error, "Invalid format for Params. One or more required fields are missing !"}
+        end
+    end
+
+    defp checkIfTopicAlreadyPresent?(params) do
+        topicName = String.downcase(params["topic_name"])
+        allTopicNames = 
+            (from topic in TopicOfInterest, 
+            select: topic.topicName)
+            |> Repo.all()
+            |> Enum.map(& String.downcase(&1))
+            
+        topicName in allTopicNames
+    end
+
+    defp checkIfAllFieldsArePresent?(params) do
+        Map.has_key?(params, "topic_name") and Map.has_key?(params, "short_desc")
+    end
+
+    def getUsersTopicsOfInterests(userId) do
+        case checkIfUserHasAnyTopics(userId) do
+            true -> {:ok, getAllUserTopics(userId)}
+            false -> {:ok, "User does not have any topics of interests yet !"}
+        end
+    end
+
     def checkIfUserExists(emailId) do
         user = User
             |> where([user], user.email == ^emailId)
@@ -25,7 +65,7 @@ defmodule ApiContext do
     end
 
     defp checkIfUserHasAnyTopics(userId) do
-        Repo.exists(from userTopic in UserTopicsRelationship, where: userTopic.userId == ^userId)
+        Repo.exists?(from userTopic in UserTopicsRelationship, where: userTopic.userId == ^userId)
     end
 
     defp getAllUserTopics(userId) do
@@ -34,8 +74,12 @@ defmodule ApiContext do
             where: userTopic.userId == ^userId,
             select: userTopic.topicId
 
-        topicsIds = Repo.all(queryForAllTopicIds)
-
+        Repo.all(queryForAllTopicIds)
+        |> Enum.map(fn topicId -> 
+            topicQuery = 
+                from topic in TopicOfInterest, where: topic.id == ^topicId
+            Repo.one(topicQuery)
+        end)
     end
 
     def getAllUserRecords() do
@@ -43,18 +87,18 @@ defmodule ApiContext do
             allUsers = 
                 User
                 |> Repo.all()
-                # |> Repo.preload(:topics_of_interests)
-
-            allUsers
-            |> Enum.map(fn user -> 
-                case checkIfUserHasAnyTopics(user.id) do
-                    false -> 
-                        Map.put(user, :topic_of_interests, [])
-                    true -> 
-                        getAllUserTopics(user.id)
-                end
-            end)
-            {:ok, records}
+            
+            userRecords = 
+                allUsers
+                |> Enum.map(fn user -> 
+                    case checkIfUserHasAnyTopics(user.id) do
+                        false -> 
+                            Map.put(user, :topics, [])
+                        true -> 
+                            Map.put(user, :topics, getAllUserTopics(user.id))
+                    end
+                end)
+            {:ok, userRecords}
         catch 
             exception -> {:error, exception}
         end

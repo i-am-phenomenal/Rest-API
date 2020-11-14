@@ -15,7 +15,6 @@ defmodule RestApiWeb.UserView do
     end
 
     def render("all_user_records.json", %{userRecords: userRecords}) do
-        
         userRecords
         |> Enum.map(fn record -> 
             %{
@@ -24,7 +23,7 @@ defmodule RestApiWeb.UserView do
                 age: record.age,
                 id: record.id,
                 password: record.password,
-                topicsOfInterest: getTopicsOfInterest(record.topics_of_interests)
+                topicsOfInterest: getTopicsOfInterest(record.topics)
             }
         end)
     end

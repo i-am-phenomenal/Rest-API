@@ -24,6 +24,8 @@ defmodule RestApiWeb.Router do
     post "/sign_up", UserController, :signUp
     get "/get_all_users", UserController, :getAllUsers
     post "/users/topic_of_interest/", UserController, :addTopicOfInterest
+    get "/user/:user_id/topics_of_interests", TopicController, :getUsersTopicsOfInterests
+    post "/add_topic", TopicController, :addNewTopicOfInterest
   end
 
   # Other scopes may use custom stacks.
