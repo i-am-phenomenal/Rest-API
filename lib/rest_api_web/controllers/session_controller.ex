@@ -13,8 +13,7 @@ defmodule RestApiWeb.SessionController do
         if maybeUser do
             redirect(conn, to: "/api/protected")
         else 
-            ApiContext,authenticateUser(emailId, password)
-            |> login
+            # ApiContext,authenticateUser(emailId, password)
             send_resp(conn, 200, "ELSE CLAUSE")
         end
     end
@@ -25,10 +24,11 @@ defmodule RestApiWeb.SessionController do
     end
 
     defp loginReply({:ok, user}, conn) do
+        {:ok, token, claims} = RestApi.Guardian.encode_and_sign(user)
         conn
         |> put_flash(:info, "Welcome")
         |> Guardian.Plug.sign_in(user)
-        |> redirect(to: "/api/protected")
+        |> send_resp(200, token)
     end
 
     defp loginReply({:error, reason}, conn) do

@@ -15,6 +15,7 @@ defmodule RestApiWeb.Router do
 
   pipeline :ensure_auth do
     plug Guardian.Plug.EnsureAuthenticated
+    plug RestApi.Plug.Authentication
   end
 
   pipeline :api do

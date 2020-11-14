@@ -7,6 +7,10 @@ defmodule RestApi.Guardian do
         {:ok, to_string(user.id)}
     end
 
+    def subject_for_token(_, _) do
+        {:error, :reason}
+    end
+
     # Used to decode a user from a token
     def resource_from_claims(%{"sub" => id}) do
         user = ApiContext.getUserById(id)
