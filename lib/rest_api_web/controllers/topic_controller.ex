@@ -19,6 +19,13 @@ defmodule RestApiWeb.TopicController do
         end
     end
 
+    def getAllTopics(conn, _params) do
+        case ApiContext.getAllTopicsOfInterests() do
+            {:ok, allTopics} -> render(conn, "user_topics.json", topics: allTopics)
+            {:error, reason} -> send_resp(conn, 500, reason)
+        end
+    end
+
     def addNewTopicOfInterest(conn, params) do
         case ApiContext.addNewTopicOfInterest(params) do
             :ok -> send_resp(conn, 200, "Added New Topic")

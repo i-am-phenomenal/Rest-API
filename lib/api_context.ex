@@ -10,7 +10,7 @@ defmodule ApiContext do
 
     def addNewTopicOfInterest(params) do
         if checkIfAllFieldsArePresent?(params) do
-            case checkIfTopicAlreadyPresent?(params) do
+            case checkIfTopicAlreadyPresent?(String.downcase(params["topic_name"])) do
                 true -> 
                     {:error, "Topic Already present"}
                 false -> 
@@ -26,8 +26,14 @@ defmodule ApiContext do
         end
     end
 
-    defp checkIfTopicAlreadyPresent?(params) do
-        topicName = String.downcase(params["topic_name"])
+    defp checkIfTopicPresentById?(topicId) do
+        case Repo.get_by(TopicOfInterest, id: topicId) do
+            nil -> false
+            _topic -> true
+        end
+    end
+
+    defp checkIfTopicAlreadyPresent?(topicName) do
         allTopicNames = 
             (from topic in TopicOfInterest, 
             select: topic.topicName)
@@ -35,6 +41,71 @@ defmodule ApiContext do
             |> Enum.map(& String.downcase(&1))
             
         topicName in allTopicNames
+    end
+
+    def getAllTopicsOfInterests() do
+        try do
+            {:ok, Repo.all(TopicOfInterest) }
+        catch 
+            exception -> 
+                {:error, exception}
+        end
+    end
+
+    defp getTopicIdByName(topicName) do
+        topicId = 
+            (
+                from topic in TopicOfInterest,
+                where: topic.topicName == ^topicName,
+                select: topic.id
+            )
+            |> Repo.one()
+
+        if is_nil(topicId) do
+            raise "There is no such Topic present, please make sure you enter the proper names because it is case sensitive"
+        else 
+            topicId
+        end
+    end
+
+    defp removeUserTopicRelationshipById(topicId, userId) do
+        (
+            from userTopicRelationship in UserTopicsRelationship,
+            where: userTopicRelationship.userId == ^userId and userTopicRelationship.topicId == ^topicId,
+            select: userTopicRelationship
+        )
+        |> Repo.one()
+        |> Repo.delete()
+    end
+
+    defp removeUserTopicRelationship(topicName, userId) do
+        topicId = getTopicIdByName(topicName)
+        query = 
+            from userTopicRelationship in UserTopicsRelationship,
+            where: userTopicRelationship.userId == ^userId and userTopicRelationship.topicId == ^topicId
+
+        Repo.delete(query)
+    end
+
+    def removeUserAndTopicAssociation(userId, topicIdOrName) do
+        case Integer.parse(topicIdOrName) do
+            # Means that we have topic name
+            :error -> 
+                if checkIfTopicAlreadyPresent?(topicIdOrName) do
+                    removeUserTopicRelationship(topicIdOrName, userId)
+                    :ok
+                else
+                    {:error, "Given Topic is not present"}
+                end
+                # Means  we have topic id
+            {topicId, ""} -> 
+                if checkIfTopicPresentById?(topicId) do
+                    removeUserTopicRelationshipById(topicId, userId)
+                    :ok
+                else 
+                    {:error, "Given topic id does not exist "}
+                end
+        end
     end
 
     defp checkIfAllFieldsArePresent?(params) do

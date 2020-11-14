@@ -15,6 +15,22 @@ defmodule RestApiWeb.UserController do
         end
     end
 
+    def removeUserAndTopicAssociation(conn, parameters) do
+        userId = parameters["user_id"]
+        topicIdOrName = parameters["topic_id_or_name"]
+
+        case ApiContext.checkUserbyId(userId) do
+            true -> 
+                case ApiContext.removeUserAndTopicAssociation(userId, topicIdOrName) do
+                    :ok -> send_resp(conn, 200, "Association between User Id #{userId} and topicId #{topicIdOrName} successfully removed ! ")
+
+                    {:error, reason} -> send_resp(conn, 500, reason)
+                end
+            false -> 
+                send_resp(conn, 500, "User does not exist ! ")
+        end
+    end
+
     @doc """
     Made this API for testing purposes
     """
