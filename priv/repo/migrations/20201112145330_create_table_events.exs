@@ -10,6 +10,8 @@ defmodule RestApi.Repo.Migrations.CreateTableEvents do
       add :eventDuration, :string
       add :eventHost, :string
       add :eventLocation, :string
+
+      timestamps()
     end
   end
 end

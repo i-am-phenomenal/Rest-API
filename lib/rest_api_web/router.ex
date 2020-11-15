@@ -35,19 +35,24 @@ defmodule RestApiWeb.Router do
 
   scope "/api/", RestApiWeb do
     pipe_through [:browser, :auth, :ensure_auth]
-    get "/protected", PageController, :protected
-    get "/get_all_users", UserController, :getAllUsers
-    get "/get_all_topics", TopicController, :getAllTopics
-    put "/update_user", UserController, :updateUserDetails
-    delete "/delete_user/", UserController, :deleteUserByEmailId
-    post "/users/topic_of_interest/", UserController, :addTopicOfInterest
-    get "/user/:user_id/topics_of_interests", TopicController, :getUsersTopicsOfInterests
-    post "/add_topic", TopicController, :addNewTopicOfInterest
+    get "protected", PageController, :protected
+    get "get_all_users", UserController, :getAllUsers
+    get "get_all_topics", TopicController, :getAllTopics
+    put "update_user", UserController, :updateUserDetails
+    delete "delete_user/", UserController, :deleteUserByEmailId
+    post "users/topic_of_interest/", UserController, :addTopicOfInterest
+    get "user/:user_id/topics_of_interests", TopicController, :getUsersTopicsOfInterests
+    post "add_topic", TopicController, :addNewTopicOfInterest
     delete "user/remove_topic_of_interest/", UserController, :removeUserAndTopicAssociation
 
-    scope "/admin/", RestApiWeb do
-      post "/event/add", AdminController, :addNewEvent
-    end
+    post "user/add_user_to_event/", EventController, :addUserToEvent
+  end
+
+  scope "api/admin/", RestApiWeb do
+    pipe_through [:browser, :auth, :ensure_auth]
+
+    post "event/add", AdminController, :addNewEvent
+    get "event/list/", AdminController, :listAllEvents
   end
 
   # Other scopes may use custom stacks.

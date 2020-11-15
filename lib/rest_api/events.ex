@@ -5,15 +5,15 @@ defmodule RestApi.Event do
     alias RestApi.Repo
 
     @primary_key false
-schema "events" do
-    field :id, :integer, primary_key: true
+    schema "events" do
+        field :id, :integer, primary_key: true
         field :eventDescription, :binary
         field :eventType, :string
         field :eventDate, :utc_datetime
         field :eventDuration, :string
         field :eventHost, :string
         field :eventLocation, :string
-
+        field :eventName, :string
 
         timestamps()
     end
@@ -21,7 +21,7 @@ schema "events" do
     @doc false
     def changeset(event, attrs) do
         event
-        |> cast(attrs, [:eventDescription, :eventType, :eventDate, :eventDuration, :eventHost, :eventLocation, :inserted_at, :updated_at])
-        |> validate_required([:eventDescription, :eventLocation, :eventHost])
+        |> cast(attrs, [:eventName, :eventDescription, :eventType, :eventDate, :eventDuration, :eventHost, :eventLocation, :inserted_at, :updated_at])
+        |> validate_required([:eventName, :eventDescription, :eventLocation, :eventHost])
     end
 end

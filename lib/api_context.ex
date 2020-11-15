@@ -10,23 +10,50 @@ defmodule ApiContext do
     alias Argon2
 
     def allParametersArePresent?(params) do
-        Map.has_key?(params, "eventLocation") and
+        Map.has_key?(params, "eventDescription") and
         Map.has_key?(params, "eventType") and 
         Map.has_key?(params, "eventDate") and 
         Map.has_key?(params, "eventDuration") and 
         Map.has_key?(params, "eventHost") and 
-        Map.has_key?(params, "eventLocation")
+        Map.has_key?(params, "eventLocation") and 
+        Map.has_key?(params, "eventName")
+    end
+
+    defp parseToInteger(strList) do
+        strList
+        |> Enum.map(fn val -> 
+            {converted, _} = Integer.parse(val)
+            converted
+        end)
+    end
+
+    # strDate should be of the format DD-MM-YYYY
+    defp getConvertedEventDate(strDate) do
+        [day, month, year] = String.split(strDate, "-") |> parseToInteger()
+        date = DateTime.utc_now()
+        date = Map.put(date, :day, day)
+        date = Map.put(date, :year, year)
+        date = Map.put(date, :month, month)
+        date = Map.put(date, :hour, 0)
+        date = Map.put(date, :minute, 0)
+        date = Map.put(date, :second, 0)
+        date
+    end
+
+    def getAllEventsForAdmin() do
+        {:ok, Event |> Repo.all()}
     end
 
     def addNewEvent(params) do
         if allParametersArePresent?(params) do
             eventMap = %{
-                eventLocation: params["eventLocation"],
+                eventDescription: params["eventDescription"],
                 eventType: params["eventType"],
-                eventDate: params["eventDate"],
+                eventDate: getConvertedEventDate(params["eventDate"]),
                 eventDuration: params["eventDuration"],
                 eventHost: params["eventHost"],
                 eventLocation: params["eventLocation"],
+                eventName: params["eventName"],
                 inserted_at: currentTime(),
                 updated_at: currentTime()
             }
