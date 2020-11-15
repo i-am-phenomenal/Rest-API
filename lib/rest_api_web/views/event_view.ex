@@ -12,4 +12,15 @@ defmodule RestApiWeb.EventView do
             cancelled_rsvp_count: count
         }
     end
+
+    def render("users_for_event.json", %{users: users}) do
+        users
+        |> Enum.map(fn user -> 
+            %{
+                fullName: user.fullName,
+                emailId: user.email,
+                age: user.age
+            }
+        end)
+    end
 end

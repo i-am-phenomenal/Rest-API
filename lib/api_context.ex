@@ -69,6 +69,66 @@ defmodule ApiContext do
         Repo.one(query)
     end
 
+    defp getListOfUsersWhoRejectedTheEvent(eventId) do
+        query = 
+            from userEventRelationship in UserEventRelationship,
+            left_join: user in User,
+            on: user.id == userEventRelationship.userId,
+            where: userEventRelationship.eventId == ^eventId and
+                       userEventRelationship.eventAcceptedOrRejected == "R",
+            select: user
+
+        Repo.all(query)
+    end
+
+    defp getListOfUsersWhoAccepted(eventId) do
+        userIdQuery = 
+            from userEventRelationship in UserEventRelationship,
+            where:  userEventRelationship.eventId == ^eventId and
+                        userEventRelationship.eventAcceptedOrRejected == "A",
+            select: userEventRelationship.userId
+        
+        Repo.all(userIdQuery)
+        |> Enum.map(fn userId -> 
+            userQuery = 
+                from user in User,
+                where: user.id == ^userId,
+                select: user
+            Repo.one(userQuery)
+        end)
+    end
+
+    def getUsersWhoRejectedEvent(params) do
+        nameOrId = params["event_name_or_id"]
+        case Integer.parse(nameOrId) do
+            :error -> 
+                eventId = getEventIdByEventName(String.trim(nameOrId))
+                if is_nil(eventId) do
+                    {:error, "The event with the given id does not exist"}
+                else 
+                    {:ok, getListOfUsersWhoRejectedTheEvent(eventId)}
+                end
+            {parsed, _} -> 
+                {:ok, getListOfUsersWhoRejectedTheEvent(parsed)}
+        end
+    end
+
+    def getInterestedUsersForEvent(params) do
+        nameOrId = params["event_name_or_id"]
+        case Integer.parse(nameOrId) do
+            :error -> 
+                eventId = getEventIdByEventName(String.trim(nameOrId))
+                if is_nil(eventId) do
+                    {:error, "The event with the given id does not exist"}
+
+                else 
+                    {:ok, getListOfUsersWhoAccepted(eventId)}
+                end
+            {parsed, _} -> 
+                {:ok, getListOfUsersWhoAccepted(parsed)}
+        end
+    end
+
     def getCancelledRSVPCountsForAnEvent(params) do
         eventNameOrId = params["event_name_or_id"]
         case Integer.parse(eventNameOrId) do

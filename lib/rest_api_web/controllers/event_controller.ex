@@ -31,4 +31,20 @@ defmodule RestApiWeb.EventController do
             {:error, reason} -> send_resp(conn, 200, reason)
         end
     end
+
+    def listInterestedUsersForEvent(conn, params) do
+        case ApiContext.getInterestedUsersForEvent(params) do
+            {:ok, users} -> render(conn, "users_for_event.json", users: users)
+
+            {:error, reason} -> send_resp(conn, 500, reason)
+        end
+    end
+
+    def listOfCancelledUsersForEvent(conn, params) do
+        case ApiContext.getUsersWhoRejectedEvent(params) do
+            {:ok, users} -> render(conn, "users_for_event.json", users: users)
+
+            {:error, reason} -> send_resp(conn, 500, reason)
+        end
+    end
 end
