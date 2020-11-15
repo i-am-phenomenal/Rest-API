@@ -6,7 +6,38 @@ defmodule ApiContext do
     alias RestApi.User
     alias RestApi.TopicOfInterest
     alias RestApi.UserTopicsRelationship
+    alias RestApi.Event
     alias Argon2
+
+    def allParametersArePresent?(params) do
+        Map.has_key?(params, "eventLocation") and
+        Map.has_key?(params, "eventType") and 
+        Map.has_key?(params, "eventDate") and 
+        Map.has_key?(params, "eventDuration") and 
+        Map.has_key?(params, "eventHost") and 
+        Map.has_key?(params, "eventLocation")
+    end
+
+    def addNewEvent(params) do
+        if allParametersArePresent?(params) do
+            eventMap = %{
+                eventLocation: params["eventLocation"],
+                eventType: params["eventType"],
+                eventDate: params["eventDate"],
+                eventDuration: params["eventDuration"],
+                eventHost: params["eventHost"],
+                eventLocation: params["eventLocation"],
+                inserted_at: currentTime(),
+                updated_at: currentTime()
+            }
+            Repo.insert(
+                Event.changeset(%Event{}, eventMap)
+            )
+            {:ok, eventMap}
+        else
+            {:error, "One or more fields are not present"}
+        end
+    end
 
     def getUserById(id) do
         Repo.get_by(User, id: id)

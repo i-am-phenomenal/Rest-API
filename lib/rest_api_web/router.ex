@@ -31,6 +31,8 @@ defmodule RestApiWeb.Router do
 
   end
 
+  
+
   scope "/api/", RestApiWeb do
     pipe_through [:browser, :auth, :ensure_auth]
     get "/protected", PageController, :protected
@@ -42,6 +44,10 @@ defmodule RestApiWeb.Router do
     get "/user/:user_id/topics_of_interests", TopicController, :getUsersTopicsOfInterests
     post "/add_topic", TopicController, :addNewTopicOfInterest
     delete "user/remove_topic_of_interest/", UserController, :removeUserAndTopicAssociation
+
+    scope "/admin/", RestApiWeb do
+      post "/event/add", AdminController, :addNewEvent
+    end
   end
 
   # Other scopes may use custom stacks.

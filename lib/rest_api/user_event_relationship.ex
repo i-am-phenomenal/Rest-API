@@ -9,11 +9,11 @@ defmodule RestApi.UserEventRelationship do
         field :id, :integer, primary_key: true
         field :userId, :integer
         field :eventId, :integer
-        field :isAccepted, :boolean
-        field :isRejected, :boolean
-
-        # belongs_to :user
-
+        # Possible states are
+        # "A" -> Accepted
+        # "R" -> Rejected
+        field :eventAcceptedOrRejected, :string
+        
         timestamps()
     end
 
