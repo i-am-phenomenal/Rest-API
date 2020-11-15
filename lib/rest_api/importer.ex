@@ -6,23 +6,169 @@ defmodule RestApi.Importer do
     alias RestApi.User
     alias RestApi.TopicOfInterest
     alias RestApi.Event
+    alias RestApi.UserEventRelationship
+    alias RestApi.UserTopicsRelationship
     alias Argon2
 
     def seedData() do
         seedTopics()
         seedEvents()
         seedUser()
+        seedUserEventRelationships()
+        seedUserTopicRelationships()
+    end
+
+    defp seedUserTopicRelationships() do
+        [
+            %{
+                userId: 1,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 1,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 1,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 1,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 1,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 1,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 1,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 2,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 2,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 2,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 2,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 2,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 3,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 3,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 3,
+                topicId: Enum.random(0..20),
+            },
+            %{
+                userId: 3,
+                topicId: Enum.random(0..20),
+            }
+        ]
+        |> Enum.map(fn userTopicMap -> 
+            Repo.insert(
+                UserTopicsRelationship.changeset(%UserTopicsRelationship{}, userTopicMap)
+            )
+        end)
+    end
+
+    defp seedUserEventRelationships() do
+        choices = ["A", "R"]
+        [
+            %{
+                userId: 3,
+                eventId: Enum.random(0..50),
+                eventAcceptedOrRejected: Enum.random(choices)
+            },
+            %{
+                userId: 3,
+                eventId: Enum.random(0..50),
+                eventAcceptedOrRejected: Enum.random(choices)
+            },
+            %{
+                userId: 1,
+                eventId: Enum.random(0..50),
+                eventAcceptedOrRejected: Enum.random(choices)
+            },
+            %{
+                userId: 1,
+                eventId: Enum.random(0..50),
+                eventAcceptedOrRejected: Enum.random(choices)
+            },
+            %{
+                userId: 2,
+                eventId: Enum.random(0..50),
+                eventAcceptedOrRejected: Enum.random(choices)
+            },
+            %{
+                userId: 2,
+                eventId: Enum.random(0..50),
+                eventAcceptedOrRejected: Enum.random(choices)
+            },
+            %{
+                userId: 2,
+                eventId: Enum.random(0..50),
+                eventAcceptedOrRejected: Enum.random(choices)
+            },
+            %{
+                userId: 2,
+                eventId: Enum.random(0..50),
+                eventAcceptedOrRejected: Enum.random(choices)
+            }   
+        ]
+        |> Enum.map(fn userEventMap -> 
+            Repo.insert(
+                UserEventRelationship.changeset(%UserEventRelationship{}, userEventMap)
+            )
+        end)
     end
 
     defp seedUser() do
-        userMap = %{
-            email: "chat29aditya@gmail.com",
-            password: "pass",
-            age: 30,
-            fullName: "Aditya Chaturvedi"
-        }
-        
-        Repo.insert(User.changeset(%User{}, userMap))
+        userMaps = [
+            %{
+                email: "chat29aditya@gmail.com",
+                password: "pass",
+                age: 30,
+                fullName: "Aditya Chaturvedi"
+            },
+
+            %{
+                email: "chat39email@gmail.com",
+                password: "pass",
+                age: 40,
+                fullName: "Full Name"
+            },
+
+            %{
+                email: "joeRogan@gmail.com",
+                password: "pass",
+                age: 40,
+                fullName: "Joe Rogan"
+            }
+        ]
+        |> Enum.map(fn userMap -> 
+            Repo.insert(User.changeset(%User{}, userMap))    
+        end)
     end
 
     defp seedEvents() do

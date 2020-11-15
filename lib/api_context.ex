@@ -6,8 +6,100 @@ defmodule ApiContext do
     alias RestApi.User
     alias RestApi.TopicOfInterest
     alias RestApi.UserTopicsRelationship
+    alias RestApi.UserEventRelationship
     alias RestApi.Event
     alias Argon2
+
+    defp getUserIdByEmail(email) do
+        userQuery = 
+            from user in User,
+            where: user.email == ^email,
+            select: user.id
+            
+        Repo.one(userQuery)
+    end
+
+    def getEventIdByEventName(eventName) do
+        eventQuery = 
+            from event in Event,
+            where: event.eventName == ^eventName,
+            select: event.id
+
+        Repo.one(eventQuery)
+    end
+
+    def addUserEventAssociationByEmail(params) do
+        userId = getUserIdByEmail(params["email"])
+        eventId = getEventIdByEventName(String.trim(params["eventName"]))
+
+        if is_nil(userId) or is_nil(eventId) do
+            {:error, "User Id or Event does not exist"}
+        else 
+            userEventMap = %{
+                userId: userId,
+                eventId: eventId,
+                eventAcceptedOrRejected: "A",
+                inserted_at: currentTime(),
+                updated_at: currentTime()
+            }
+            Repo.insert(
+                UserEventRelationship.changeset(%UserEventRelationship{}, userEventMap)
+            )
+            :ok
+        end
+    end
+
+    defp getCancelledRsvpCountsForEvent(eventId) do
+        query = 
+            from userEventRelationship in UserEventRelationship,
+            where:  userEventRelationship.eventId == ^eventId and
+                        userEventRelationship.eventAcceptedOrRejected == "R",
+            select: count(userEventRelationship.id)
+
+        Repo.one(query)
+    end
+
+    defp getRsvpCountsForEvent(eventId) do
+        query = 
+            from userEventRelationship in UserEventRelationship,
+            where:  userEventRelationship.eventId == ^eventId and
+                        userEventRelationship.eventAcceptedOrRejected == "A",
+            select: count(userEventRelationship.id)
+
+        Repo.one(query)
+    end
+
+    def getCancelledRSVPCountsForAnEvent(params) do
+        eventNameOrId = params["event_name_or_id"]
+        case Integer.parse(eventNameOrId) do
+            :error -> 
+                eventId = getEventIdByEventName(String.trim(eventNameOrId))
+                    if is_nil(eventId) do
+                        {:error, "The Event Name does not exist"}
+                    else
+                        {:ok, getCancelledRsvpCountsForEvent(eventId)}
+                    end
+            {parsed, _} -> 
+                    {:ok, getCancelledRsvpCountsForEvent(parsed)}
+        end
+    end
+
+    def getRSVPCountsForAnEvent(params) do
+        eventNameOrId = params["event_name_or_id"]
+        case Integer.parse(eventNameOrId) do
+            :error -> 
+                #Means we have event name as arg
+                eventId = getEventIdByEventName(String.trim(eventNameOrId))
+                if is_nil(eventId) do
+                    {:error, "The Event Name does not exist"}
+                else
+                    {:ok, getRsvpCountsForEvent(eventId)}
+                end
+            {parsed, _} -> 
+                #Means we have Id 
+                {:ok, getRsvpCountsForEvent(parsed)}
+        end
+    end
 
     def allParametersArePresent?(params) do
         Map.has_key?(params, "eventDescription") and

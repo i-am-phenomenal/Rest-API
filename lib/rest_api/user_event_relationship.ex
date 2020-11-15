@@ -5,7 +5,7 @@ defmodule RestApi.UserEventRelationship do
     alias RestApi.Repo 
 
     @primary_key false
-    schema "user_event_relationship" do
+    schema "user_event_relationships" do
         field :id, :integer, primary_key: true
         field :userId, :integer
         field :eventId, :integer
@@ -20,8 +20,11 @@ defmodule RestApi.UserEventRelationship do
     @doc false
     def changeset(relationship, attrs) do
         relationship
-        |> cast(attrs, [:userId, :eventId, :isAccepted, :isRejected])
+        |> cast(attrs, [:userId, :eventId, :eventAcceptedOrRejected, :inserted_at, :updated_at])
         |> validate_required([:userId, :eventId])
-        |> foreign_key_constraint([:userId, :eventId])
+        |> foreign_key_constraint(:userId)
+        |> foreign_key_constraint(:eventId)
+        |> unique_constraint([:userId, :eventId])
+        |> validate_inclusion(:eventAcceptedOrRejected, ["A", "R"])
     end
 end
