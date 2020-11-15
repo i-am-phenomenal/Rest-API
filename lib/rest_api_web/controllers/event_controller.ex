@@ -16,6 +16,19 @@ defmodule RestApiWeb.EventController do
         end
     end
 
+    def removeUserFromEvent(conn, params) do
+       emailId = params["email"]
+       case ApiContext.checkIfUserExists(emailId) do
+        true -> 
+            case ApiContext.removeUserFromEvent(params) do
+                :ok -> send_resp(conn, 200, "User with email Id #{emailId} has been removed from the event !")                
+                {:error, reason} -> send_resp(conn, 500, reason)
+            end
+        false -> 
+            send_resp(conn, 500, "User does not exist ! ")
+       end
+    end
+
     def getRSVPCountsForAnEvent(conn, params) do
         case ApiContext.getRSVPCountsForAnEvent(params) do
             {:ok, rsvpCounts }-> render(conn, "rsvp_count.json", count: rsvpCounts)

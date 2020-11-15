@@ -11,11 +11,11 @@ defmodule RestApi.Importer do
     alias Argon2
 
     def seedData() do
-        # seedTopics()
-        # seedEvents()
-        # seedUser()
-        # seedUserEventRelationships()
-        # seedUserTopicRelationships()
+        seedTopics()
+        seedEvents()
+        seedUser()
+        seedUserEventRelationships()
+        seedUserTopicRelationships()
         addMoreUserTopicRelationships()
     end
 

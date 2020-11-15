@@ -7,6 +7,27 @@ defmodule RestApiWeb.UserView do
         |> Map.drop([:__meta__, :topics_of_interests])
     end
 
+    def render("all_events.json", %{allEvents: allEvents, emailId: emailId}) do
+        formattedEvents = 
+            allEvents
+            |> Enum.map(fn event -> 
+                %{
+                    eventName:  event.eventName,
+                    eventType: event.eventType,
+                    eventDescription: event.eventDescription,
+                    eventDate: event.eventDate,
+                    eventDuration: event.eventDuration,
+                    eventHost: event.eventHost,
+                    eventLocation: event.eventLocation
+                }
+            end)
+
+        %{
+            events: formattedEvents,
+            emailId: emailId
+        }
+    end
+
     def render("user_topic_of_interest.json", %{resp: relationship}) do
         %{
             userId: relationship.userId,

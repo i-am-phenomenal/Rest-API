@@ -81,4 +81,18 @@ defmodule RestApiWeb.UserController do
             false -> send_resp(conn, 500, "User does not exist !")
         end
     end
+
+    def getListOfEventsForUser(conn, params) do
+        emailId = params["email"]
+        case ApiContext.checkIfUserExists(emailId) do
+            true -> 
+                case ApiContext.getAllEventsForCurrentUser(emailId) do
+                    {:ok, allEvents} -> render(conn, "all_events.json", %{allEvents: allEvents, emailId: emailId})
+                    {:error, reason} -> send_resp(conn, 500, reason)
+                end
+
+            false -> 
+                send_resp(conn, 500, "User with email #{emailId} does not exist")
+        end
+    end
 end

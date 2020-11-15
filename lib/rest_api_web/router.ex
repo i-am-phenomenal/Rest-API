@@ -48,8 +48,10 @@ defmodule RestApiWeb.Router do
     get "/event/rsvp_counts/:event_name_or_id", EventController, :getRSVPCountsForAnEvent
     get "/event/rsvp_cancelled_counts/:event_name_or_id", EventController, :getCancelledRSVPCountsForEvent
     post "user/add_user_to_event/", EventController, :addUserToEvent
+    post "user/remove_user_from_event/", EventController, :removeUserFromEvent
     get "events/users/list/:event_name_or_id", EventController, :listInterestedUsersForEvent
-    get  "events/cancelled_users/list/:event_name_or_id", EventController, :listOfCancelledUsersForEvent
+    get "events/cancelled_users/list/:event_name_or_id", EventController, :listOfCancelledUsersForEvent
+    get "/user/my_calendar/:email", UserController, :getListOfEventsForUser
   end
 
   scope "api/admin/", RestApiWeb do

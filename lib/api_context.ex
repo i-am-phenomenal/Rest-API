@@ -28,6 +28,31 @@ defmodule ApiContext do
         Repo.one(eventQuery)
     end
 
+    def removeUserFromEvent(params) do
+       userId = getUserIdByEmail(params["email"]) 
+       eventId = getEventIdByEventName(String.trim(params["eventName"]))
+
+       if is_nil(userId) or is_nil(eventId) do
+        {:error, "User or Event does not exist"}
+       else
+            record =             
+                (
+                    from userEventRelationship in UserEventRelationship,
+                    where: userEventRelationship.userId == ^userId and userEventRelationship.eventId == ^eventId,
+                    select: userEventRelationship
+                )
+                |> Repo.one()
+
+                if is_nil(record) do
+                    {:error, "The user has not accepted the event yet. So removing the user from such event is pointless"}
+                else 
+                    record |> Repo.delete()
+                end
+            
+            :ok
+       end
+    end
+
     def addUserEventAssociationByEmail(params) do
         userId = getUserIdByEmail(params["email"])
         eventId = getEventIdByEventName(String.trim(params["eventName"]))
@@ -506,6 +531,25 @@ defmodule ApiContext do
         catch 
             exception -> 
                 {:error, exception}
+        end
+    end
+
+    def getAllEventsForCurrentUser(emailId) do
+        userId = getUserIdByEmail(emailId)
+
+        query = 
+            from userEventRelationship in UserEventRelationship,
+            left_join: event in Event, 
+            on:  event.id == userEventRelationship.eventId,
+            where: userEventRelationship.userId == ^userId,
+            select: event
+
+        allEvents = Repo.all(query)
+
+        if allEvents == [] do
+            {:error, "There are no events for this user"}
+        else
+            {:ok, allEvents}
         end
     end
 
