@@ -29,7 +29,7 @@ defmodule RestApiWeb.Router do
 
     get "/", PageController, :index
 
-    get "/login", SessionController,  :new
+    # get "/login", SessionController,  :new
     post "/login", SessionController, :login
     post "/sign_up", UserController, :signUp
 
@@ -37,7 +37,7 @@ defmodule RestApiWeb.Router do
 
   scope "api/admin/", RestApiWeb do
     pipe_through [:browser, :basic_auth]
-    post "/login", AdminController, :adminLogin
+    # post "/login", AdminController, :adminLogin
     post "event/add", AdminController, :addNewEvent
     get "event/list/", AdminController, :listAllEvents
   end
@@ -55,8 +55,8 @@ defmodule RestApiWeb.Router do
     post "add_topic", TopicController, :addNewTopicOfInterest
     delete "user/remove_topic_of_interest/", UserController, :removeUserAndTopicAssociation
 
-    get "/event/rsvp_counts/:event_name_or_id", EventController, :getRSVPCountsForAnEvent
-    get "/event/rsvp_cancelled_counts/:event_name_or_id", EventController, :getCancelledRSVPCountsForEvent
+    get "event/rsvp_counts/:event_name_or_id", EventController, :getRSVPCountsForAnEvent
+    get "event/rsvp_cancelled_counts/:event_name_or_id", EventController, :getCancelledRSVPCountsForEvent
     post "user/add_user_to_event/", EventController, :addUserToEvent
     post "user/remove_user_from_event/", EventController, :removeUserFromEvent
     get "events/users/list/:event_name_or_id", EventController, :listInterestedUsersForEvent
@@ -64,7 +64,7 @@ defmodule RestApiWeb.Router do
     get "user/calendar/:email", UserController, :getListOfEventsForUser
     get "user/my_events/", UserController, :listMyevents
     post "user/add_event_to_my_list/", UserController, :addEventToMyList
-    get "/user/get_my_topics/", TopicController, :getCurrentUserTopicsOfInterests
+    get "user/get_my_topics/", TopicController, :getCurrentUserTopicsOfInterests
     post "user/add_topic/:topic_name_or_id", TopicController, :addTopicOfInterestForCurrentUser
   end
 

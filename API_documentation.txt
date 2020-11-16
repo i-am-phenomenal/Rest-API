@@ -183,3 +183,176 @@ Body ->
             eventName
         }
 It returns a status code of 200 along with message saying "User with email Id #{emailId} has been removed from the event !"
+
+
+(GET) "api/v1/events/users/list/:event_name_or_id"
+This API returns a list of users who have accepted the event
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+Query Parameters -> event_name_or_id
+It returns a status code of 200 with a list of JSON and every JSON structure is of the following format
+%{
+        fullName
+        emailId
+        age
+    }
+
+
+(GET) "api/v1/events/cancelled_users/list/:event_name_or_id"
+This API returns a list of users who have rejected a particular event
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+Query Parameters -> event_name_or_id
+It returns a status code of 200 with a list of JSON and every JSON structure is of the following format
+%{
+        fullName
+        emailId
+        age
+    }
+
+
+(GET) "api/v1/user/calendar/:email"
+This API returns a list of events which a given user has accepted
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+Query Parameters -> email (emailId of the user)
+It returns a status code of 200 and a list of JSON structure as follows
+%{
+        events {
+            eventName
+            eventType
+            eventDescription
+            eventDate
+            eventDuration
+            eventHost
+            eventLocation
+        }
+        emailId
+    }
+
+(GET) "api/v1/user/my_events/"
+This API returns a list of events for the currently logged in user
+It checks for the user whose value is stored in session oject using Guardian.Plug.current_resource(conn) and if a user is found, it returns a list of events which the user has accepted
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+It returns a status code of 200 and a list of JSON structure as follows
+%{
+        events {
+            eventName
+            eventType
+            eventDescription
+            eventDate
+            eventDuration
+            eventHost
+            eventLocation
+        }
+        emailId
+    }
+
+(POST) "api/v1/user/add_event_to_my_list/"
+This API adds a relationship between the currently logged in user and an event in the user_events_relationships resource
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+Once it successfully adds the user and event relationship, it returns a status code of 200 along with a list of event user has accepted
+%{
+        events {
+            eventName
+            eventType
+            eventDescription
+            eventDate
+            eventDuration
+            eventHost
+            eventLocation
+        }
+        emailId
+    }
+
+(GET) "api/v1/user/get_my_topics/"
+This API returns a list of topics which the currently logged in user is associated with
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+It returns a status code of 200 along with a list of JSON structure with the following structure
+%{
+        topicId
+        topicName
+        shortDesc
+    }
+
+(POST) "api/v1/user/add_topic/:topic_name_or_id"
+This API adds a topic association for the currently logged in user
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+It accepts either a topic name or topic id and upon success, it returns a status code of 200 along with a message saying "Added New Topic for user #{currentUser.fullName}"
+
+ADMIN API's
+The admin scope API's have been written using Basic Auth. It means whenever we make a request, we need to pass email Id and password combination so that it generates an authorization token
+Once the auth token is generated, we need to add a header in all the subsequent requests called authorization which should be of the following format
+authorization - Basic "Token"
+The basic auth username and password configuration has been written in config.exs
+The current configuration is as follows
+username: "admin.email@gmail.com",
+password: "admin"
+
+At the time of seeding the data, a user has also been with the following credentials
+%{
+    fullName: "Admin" 
+    email: "admin.email@gmail.com",
+    password: "admin",
+    age: 30
+}
+
+
+(POST) "api/admin/event/add" 
+This API adds an event in the events table
+Headers -> 
+    content-type: application/json
+    authorization: "Basic token" 
+Body -> 
+    %{
+            eventDescription
+            eventType
+            eventDate
+            eventDuration
+            eventHost
+            eventLocation
+            eventName
+        }
+Once the event is added, it returns a status code of 200 with the following response
+%{
+        eventDescription
+        eventType
+        eventDate
+        eventDuration
+        eventHost
+        eventLocation
+        eventName
+        inserted_at
+        updated_at
+    }
+
+(GET) "api/admin/event/list"
+This API returns a list of all the events in the events table
+Headers -> 
+    content-type: application/json
+    authorization: "Basic token" 
+
+It returns a status code of 200 along with list of JSON structure with the following response
+%{
+        id
+        eventDescription
+        eventType
+        eventDate
+        eventDuration
+        eventHost
+        eventLocation
+        eventName
+        inserted_at
+        updated_at
+    }

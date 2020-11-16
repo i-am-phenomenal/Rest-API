@@ -177,7 +177,12 @@ defmodule RestApi.Importer do
                 age: 30,
                 fullName: "Aditya Chaturvedi"
             },
-
+            %{
+                email: "admin.email@gmail.com",
+                password: "admin",
+                age: 30,
+                fullName: "Admin" 
+            },
             %{
                 email: "chat39email@gmail.com",
                 password: "pass",
