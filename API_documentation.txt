@@ -85,4 +85,101 @@ Header ->
 Body -> emailId: email id of the user which has to be deleted
 It returns a String respons ewith status code 200 if the user record was updated successfully
 
-(POST) 
+(POST) "api/v1/users/topic_of_interest/"
+This API adds an association between user and topic_of_interest
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+Body -> {
+    user_id
+    topic_id
+}
+It checks whether the user exists or not. If the user exists, it will add an association between the 2
+It returns a JSON response with status code 200 
+    {
+        userId
+        topicId
+    }
+
+(GET) "api/v1/user/:user_id/topics_of_interests"
+This API gets all the topics of interest for the user with the given userId
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+It returns a list of JSON response and every JSON has the following structure with a status code of 200 
+{
+    topicName
+    shortDesc
+}
+
+(POST) "api/v1/add_topic" 
+This API will add a new topic in the topics_of_interests resource
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+Body -> 
+    {
+        topicName
+        shortDesc
+    }
+It will return a status code of 200 along with a message saying "New Topics has been added" 
+
+
+(DELETE) "api/v1/user/remove_topic_of_interest/"
+This API deletes an association between user and topic_of_interest
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+Body -> {
+    user_id
+    topic_id_or_name
+}
+It returns a status code of 200 with a message saying "Association between User Id #{userId} and topicId #{topicIdOrName} successfully removed ! "
+
+
+(GET) "api/v1/event/rsvp_counts/:event_name_or_id"
+This API returns a count of users who accepted the event
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+Query parameter -> Event Name or eventId
+It returns a status code of 200 with a JSON response as follows
+    %{
+            rsvp_count: count
+        }
+
+(GET) "api/v1//event/rsvp_cancelled_counts/:event_name_or_id"
+This API returns a count of users who rejected the event
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+Query parameter -> Event Name or eventId
+It returns a status code of 200 with a JSON response as follows
+    %{
+            cancelled_rsvp_count: count
+        }
+
+
+(POST) "api/v1/user/add_user_to_event/"
+This API adds an association between user and events resource in the user_event_relationships table
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+Body -> 
+    %{
+            email
+            eventName
+        }
+It returns a status code of 200 with a message saying "User has accepted the invite"
+
+(POST) "api/v1/user/remove_user_from_event/" 
+This API removes an association between user and events resource from the user_event_relationships table
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+Body -> 
+    %{
+            email
+            eventName
+        }
+It returns a status code of 200 along with message saying "User with email Id #{emailId} has been removed from the event !"

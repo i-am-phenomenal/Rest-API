@@ -19,7 +19,7 @@ The database consists of the following tables
     The column names are id, eventName, eventType, eventDate, eventDuration, eventHost, eventLocation, 
 
     user_event_relationships -> It acts as a linker table between user and events resource.
-    Column names are id, userId ad eventId
+    Column names are id, userId ad eventId, eventAcceptedOrRejected (Possible values are "A" or "R")
 
 When it comes to design planning, the approach is simple, There should be separate controller files for different entitites
 and all the different controllers should be using a common context file called api_context.ex in such a way that a typical API will follow this path
