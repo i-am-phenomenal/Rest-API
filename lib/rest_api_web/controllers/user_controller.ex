@@ -82,6 +82,23 @@ defmodule RestApiWeb.UserController do
         end
     end
 
+    def listMyevents(conn, _) do
+        currentUser = Guardian.Plug.current_resource(conn)
+        case ApiContext.getEventsForCurrentUser(currentUser.email) do
+            {:ok, allEvents} -> render(conn, "all_events.json", %{allEvents: allEvents, emailId: currentUser.email})
+            {:error, reason} -> send_resp(conn, 500, reason)
+        end
+    end
+
+    def addEventToMyList(conn, params) do
+        currentUser = Guardian.Plug.current_resource(conn)
+        nameOrId = params["event_name_or_id"]
+        case ApiContext.addEventToMyList(currentUser, nameOrId) do
+            {:ok, myEvents} -> render(conn, "all_events.json", %{allEvents: myEvents, emailId: currentUser.email})
+            {:error, reason} -> send_resp(conn, 500, reason)
+        end
+    end
+
     def getListOfEventsForUser(conn, params) do
         emailId = params["email"]
         case ApiContext.checkIfUserExists(emailId) do

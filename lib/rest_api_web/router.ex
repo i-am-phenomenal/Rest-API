@@ -51,7 +51,9 @@ defmodule RestApiWeb.Router do
     post "user/remove_user_from_event/", EventController, :removeUserFromEvent
     get "events/users/list/:event_name_or_id", EventController, :listInterestedUsersForEvent
     get "events/cancelled_users/list/:event_name_or_id", EventController, :listOfCancelledUsersForEvent
-    get "/user/my_calendar/:email", UserController, :getListOfEventsForUser
+    get "user/calendar/:email", UserController, :getListOfEventsForUser
+    get "user/my_events/", UserController, :listMyevents
+    post "user/add_event_to_my_list/", UserController, :addEventToMyList
   end
 
   scope "api/admin/", RestApiWeb do

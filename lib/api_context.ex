@@ -53,6 +53,52 @@ defmodule ApiContext do
        end
     end
 
+    defp insertUserEventRelationship(userId, eventId) do
+        userEventMap = %{
+            eventId: eventId,
+            userId: userId,
+            eventAcceptedOrRejected: "A",
+            inserted_at: currentTime(), 
+            updated_at: currentTime()
+        }
+
+        Repo.insert(
+            UserEventRelationship.changeset(%UserEventRelationship{}, userEventMap)
+        )
+    end
+
+    defp getAllEventsForCurrentUser(userId) do
+        query = 
+            from userEventRelationship in UserEventRelationship,
+            left_join: event in Event,
+            on: event.id == userEventRelationship.eventId,
+            where: userEventRelationship.userId == ^userId,
+            select: event
+
+        Repo.all(query)
+    end
+
+    def addEventToMyList(currentUser, nameOrId) do
+        userId = currentUser.id
+        case Integer.parse(nameOrId) do
+            :error ->
+                eventId = 
+                    nameOrId
+                    |> String.trim()
+                    |> getEventIdByEventName()
+                
+                if is_nil(eventId) do
+                    {:error, "User Id or Event does not exist"}
+                else 
+                    insertUserEventRelationship(userId, eventId)
+                    {:ok, getAllEventsForCurrentUser(userId)}
+                end
+            {parsedEventId, _} -> 
+                insertUserEventRelationship(userId, parsedEventId)
+                {:ok, getAllEventsForCurrentUser(userId)}
+        end
+    end
+
     def addUserEventAssociationByEmail(params) do
         userId = getUserIdByEmail(params["email"])
         eventId = getEventIdByEventName(String.trim(params["eventName"]))
@@ -534,9 +580,8 @@ defmodule ApiContext do
         end
     end
 
-    def getAllEventsForCurrentUser(emailId) do
+    def getEventsForCurrentUser(emailId) do
         userId = getUserIdByEmail(emailId)
-
         query = 
             from userEventRelationship in UserEventRelationship,
             left_join: event in Event, 
