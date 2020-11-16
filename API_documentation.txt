@@ -1,0 +1,88 @@
+The following API's were developed in this project.
+
+Before using any API, it is important to register a user and generate a jwt which should be passed in every subsequent request
+We can also use existing users which can be migrated using seeds.exs
+-> User can be registered using the API (Post) "/sign_up/"
+-> It expects body in the following format 
+    %{
+            email
+            password
+            fullName
+            age
+        }
+    It returns a JSON response in the following format 
+    %{
+            email
+            password
+            fullName
+            age
+            inserted_at
+            updated_at
+        }
+    Password is stored in the form of hash value in the database
+
+Once the user is registered, we can login the user using the following API (Post) "/login/"
+-> It expects an input in the following format 
+    {
+        user {
+            email
+            password
+        }
+    }
+
+    It uses elixir library guardian for authentication and creating session data. 
+    Once the user is authenticated, it generates a JWT which is valid for 1 day. 
+    We need to pass this JWT in every request as a header "jwt_token". The token would be then validated and necessary actin wouldbe performed
+
+(Get) "/api/v1/get_all_users/"
+This API returns a list of all the users in the users table
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+
+It returns a list of JSON structure and every JSON struct has the following structure
+    %{
+            fullName
+            email
+            age
+            id
+            password
+            topicsOfInterest {
+                topicName
+                shortDesc
+            }
+        }
+
+(Get) "api/v1/get_all_topics/" 
+This API returns a list of all the topics in the topics_of_interest resource
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+It returns a list of JSON structure and every JSON struct has the following structure
+    %{
+        topicName
+        shortDesc
+    }
+
+(PUT) "api/v1/update_user/"
+This API updates a user record in the users resource
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+Body -> %{
+            email
+            password
+            age
+            fullName
+        }
+It returns a String respons ewith status code 200 if the user record was updated successfully
+
+(DELETE) "/api/v1/delete_user"
+This API deletes a user from the users table
+Header ->
+     jwt_token: JWT token of authentication
+     content-type: application/json
+Body -> emailId: email id of the user which has to be deleted
+It returns a String respons ewith status code 200 if the user record was updated successfully
+
+(POST) 

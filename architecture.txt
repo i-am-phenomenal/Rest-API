@@ -1,0 +1,28 @@
+EXTERNAL LIBRARIES INSTALLED
+guardian -> 2.0
+argon2_elixir -> 2.0
+basic_auth -> 2.2.2
+
+DATABASE 
+Database name -> rest_api_dev
+The database consists of the following tables 
+    users -> The User resources consists of the following names 
+            id, email, fullName, password, age
+
+    topics_of_interest -> It stores information related to topics. 
+    The columns names are id, topicName and shortDesc.
+
+    user_topics_relationships -> It is a linker table between user and topics_of_interests resources. 
+    The column names are id, userId and topicId
+
+    events -> It stores information for an event. 
+    The column names are id, eventName, eventType, eventDate, eventDuration, eventHost, eventLocation, 
+
+    user_event_relationships -> It acts as a linker table between user and events resource.
+    Column names are id, userId ad eventId
+
+When it comes to design planning, the approach is simple, There should be separate controller files for different entitites
+and all the different controllers should be using a common context file called api_context.ex in such a way that a typical API will follow this path
+router.ex -> respective controller file -> api_context.ex -> respective_controller -> respective view. 
+
+This approach helped me to handle all the cases with ease and also design API's in a quick fashion.

@@ -43,7 +43,7 @@ defmodule RestApiWeb.Router do
   end
   
 
-  scope "/api/", RestApiWeb do
+  scope "/api/v1", RestApiWeb do
     pipe_through [:browser, :auth, :ensure_auth]
     get "protected", PageController, :protected
     get "get_all_users", UserController, :getAllUsers
