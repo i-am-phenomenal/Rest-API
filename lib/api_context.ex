@@ -315,6 +315,51 @@ defmodule ApiContext do
         end
     end
 
+    defp getTopicIdByTopicName(topicName) do
+        query =
+            from topic in TopicOfInterest,
+            where: topic.topicName == ^topicName,
+            select:  topic.id
+
+        Repo.one(query)
+    end
+
+    defp insertRecordInUserTopicTable(userId, topicId) do
+        userTopicMap = %{
+            userId: userId,
+            topicId: topicId
+        }
+
+        Repo.insert(
+            UserTopicsRelationship.changeset(
+                %UserTopicsRelationship{},
+                userTopicMap
+            )
+        )
+    end
+
+    def addNewTopicForCurrentUser(currentUser, params) do
+        topicNameOrId = params["topic_name_or_id"]
+        case Integer.parse(topicNameOrId) do
+            :error -> 
+                topicId =   
+                    topicNameOrId
+                    |> String.trim()
+                    |> getTopicIdByTopicName()
+
+                if is_nil(topicId) do
+                    {:error, "Topic with given name does not exist"}
+                else 
+                    insertRecordInUserTopicTable(currentUser.id, topicId)
+                    :ok
+                end
+
+            {parsedTopicId, _} -> 
+                insertRecordInUserTopicTable(currentUser.id, parsedTopicId)
+                :ok
+        end
+    end
+
     def addNewTopicOfInterest(params) do
         if checkIfAllFieldsArePresent?(params) do
             case checkIfTopicAlreadyPresent?(String.downcase(params["topic_name"])) do

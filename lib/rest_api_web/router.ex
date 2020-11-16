@@ -54,6 +54,8 @@ defmodule RestApiWeb.Router do
     get "user/calendar/:email", UserController, :getListOfEventsForUser
     get "user/my_events/", UserController, :listMyevents
     post "user/add_event_to_my_list/", UserController, :addEventToMyList
+    get "/user/get_my_topics/", TopicController, :getCurrentUserTopicsOfInterests
+    post "user/add_topic/:topic_name_or_id", TopicController, :addTopicOfInterestForCurrentUser
   end
 
   scope "api/admin/", RestApiWeb do
