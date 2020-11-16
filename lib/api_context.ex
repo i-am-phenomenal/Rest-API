@@ -297,6 +297,25 @@ defmodule ApiContext do
         User.changeset(user, %{})
     end
 
+    # def authenticateAdminCredentials(emailId, plainTextPassword) do
+    #     query = 
+    #         from user in User, 
+    #         where: user.email == ^emailId
+
+    #     case Repo.one(query) do
+    #         nil -> 
+    #             Argon2.no_user_verify()
+    #             {:error, :invalid_credentials}
+
+    #         user -> 
+    #             if Argon2.verify_pass(plainTextPassword, user.password) do
+    #                 {:ok, user}
+    #             else 
+    #                 {:error, :invalid_credentials}
+    #             end
+    #     end
+    # end
+
     def authenticateUser(emailId, plainTextPassword) do
         userQuery = 
             from user in User, 

@@ -26,6 +26,12 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+  config :basic_auth,
+  my_auth: [
+    username: "admin.email@gmail.com",
+    password: "admin"
+  ]
+
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 

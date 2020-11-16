@@ -22,7 +22,7 @@ defmodule RestApiWeb.SessionController do
     end
 
     defp loginReply({:ok, user}, conn) do
-        {:ok, token, claims} = RestApi.Guardian.encode_and_sign(user)
+        {:ok, token, claims} = RestApi.Guardian.encode_and_sign(user, %{}, ttl: {1, :day})
         conn
         |> put_flash(:info, "Welcome")
         |> Guardian.Plug.sign_in(user)

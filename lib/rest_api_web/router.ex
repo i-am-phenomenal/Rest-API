@@ -20,6 +20,10 @@ defmodule RestApiWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :basic_auth do
+    plug BasicAuth, [use_config: {:basic_auth, :my_auth}]
+  end
+
   scope "/", RestApiWeb do
     pipe_through [:browser, :auth]
 
@@ -31,6 +35,12 @@ defmodule RestApiWeb.Router do
 
   end
 
+  scope "api/admin/", RestApiWeb do
+    pipe_through [:browser, :basic_auth]
+    post "/login", AdminController, :adminLogin
+    post "event/add", AdminController, :addNewEvent
+    get "event/list/", AdminController, :listAllEvents
+  end
   
 
   scope "/api/", RestApiWeb do
@@ -56,13 +66,6 @@ defmodule RestApiWeb.Router do
     post "user/add_event_to_my_list/", UserController, :addEventToMyList
     get "/user/get_my_topics/", TopicController, :getCurrentUserTopicsOfInterests
     post "user/add_topic/:topic_name_or_id", TopicController, :addTopicOfInterestForCurrentUser
-  end
-
-  scope "api/admin/", RestApiWeb do
-    pipe_through [:browser, :auth, :ensure_auth]
-
-    post "event/add", AdminController, :addNewEvent
-    get "event/list/", AdminController, :listAllEvents
   end
 
   # Other scopes may use custom stacks.
