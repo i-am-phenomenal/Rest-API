@@ -60,4 +60,21 @@ defmodule RestApiWeb.AdminController do
             {:error, reason} -> send_resp(conn, 500, reason)
         end
     end
+
+    def updateTopicOfInterest(conn, params) do
+        case ApiContext.updateTopicOfInterest(params) do
+            {:ok, updatedTopic} -> render(conn, "topic.json", topic: updatedTopic)
+
+            {:error, reason} -> send_resp(conn, 500, reason)
+        end
+    end
+
+    def deleteTopicOfInterest(conn, params) do
+        topicNameOrId = params["topicNameOrId"]
+        case ApiContext.deleteTopicOfInterest(topicNameOrId) do
+            :ok -> send_resp(conn, 200, "Deleted the topic with name or id #{topicNameOrId} ")
+
+            {:error, reason} -> send_resp(conn, 500, reason)
+        end
+    end
 end

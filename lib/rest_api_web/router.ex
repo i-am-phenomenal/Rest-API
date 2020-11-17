@@ -44,6 +44,9 @@ defmodule RestApiWeb.Router do
     delete "event/delete", AdminController, :deleteAnEvent
     
     post "topic/add", AdminController, :addTopicOfInterest
+    put "topic/update", AdminController, :updateTopicOfInterest
+
+    delete "topic/delete", AdminController, :deleteTopicOfInterest
   end
   
 

@@ -773,6 +773,90 @@ defmodule ApiContext do
         end
     end
 
+    defp deleteTopicIfExists(topicName) do
+        query =
+            from topic in TopicOfInterest,
+            where: topic.topicName == ^topicName,
+            select: topic
+
+        case Repo.one(query) do
+            nil -> 
+                {:error, "Topic does not exist !"}
+
+            topic -> 
+                Repo.delete(topic)
+                :ok
+        end
+    end
+
+    defp getTopicByTopicId(topicId) do
+        query = 
+            from topic in TopicOfInterest,
+            where: topic.id == ^topicId,
+            select:  topic
+
+        Repo.one(query)
+    end
+
+    def deleteTopicOfInterest(topicNameOrId)  when is_number(topicNameOrId)  do
+        case getTopicByTopicId(topicNameOrId) do
+            nil -> 
+                {:error, "Topic does not exist"}
+
+            topic -> 
+                Repo.delete(topic)
+                :ok
+        end
+    end
+    
+    def  deleteTopicOfInterest(topicNameOrId) when is_binary(topicNameOrId) do
+        case Integer.parse(topicNameOrId) do
+            :error -> 
+                topicNameOrId
+                |> String.trim()
+                |> deleteTopicIfExists()
+            {parsedTopicId, _} -> 
+                deleteTopicOfInterest(parsedTopicId)
+        end
+    end
+
+    defp getTopicByTopicName(topicName) do
+        query =
+            from topic in TopicOfInterest,
+            where: topic.topicName == ^topicName,
+            select: topic
+
+        Repo.one(query)
+    end
+
+    defp updateTopicOrReturnError(params) do
+        case getTopicByTopicName(String.trim(params.topicName)) do
+            nil -> 
+                {:error, "Topic does not exist !"}
+
+            topic -> 
+                topic
+                |> TopicOfInterest.changeset(params)
+                |> Repo.update()
+
+                {:ok, Repo.get_by(TopicOfInterest, topicName: params.topicName)}
+        end
+    end
+
+    def updateTopicOfInterest(%{"topicName" => topicName, "shortDesc" => shortDesc} = params) do
+        params
+        |> convertStringKeysToAtom()
+        |> updateTopicOrReturnError()
+    end
+
+    def updateTopicOfInterest(%{"topicName" => topicName} = params) do
+        params
+        |> convertStringKeysToAtom()
+        |> updateTopicOrReturnError()
+    end
+
+    def updateTopicOfInterest(_),  do: {:error, "Invalid format of params !"}
+
     defp topicContainsAllKeys?(params) do
         Map.has_key?(params, "topicName")  and Map.has_key?(params, "shortDesc")
     end
