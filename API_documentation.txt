@@ -136,6 +136,13 @@ Body -> {
 }
 It returns a status code of 200 with a message saying "Association between User Id #{userId} and topicId #{topicIdOrName} successfully removed ! "
 
+(DELETE) "api/v1/user/events/remove"
+This API removes an association between currently logged in user and an event
+It expects a JSON response as follows
+{
+    event_name_or_id
+}
+upon successfully deleting the record, it returns a 200 status code along with a confirmation message.
 
 (GET) "api/v1/event/rsvp_counts/:event_name_or_id"
 This API returns a count of users who accepted the event
@@ -356,3 +363,31 @@ It returns a status code of 200 along with list of JSON structure with the follo
         inserted_at
         updated_at
     }
+
+(PUT) "api/admin/event/update" 
+This API updates the details of an event and returns the updated event
+Headers -> 
+    content-type: application/json
+    authorization: "Basic token" 
+Body -> It expects a JSON body which must contain atleast one of the following values.
+{
+    eventName
+    eventHost
+    eventLocation
+    eventDuration
+    eventType
+    eventDescription
+    eventDate
+}
+It expects any number of arguments in this map
+It returns a JSON structure of the newl updated record
+
+(DELETE) "api/admin/event/delete"
+This API deletes an event from the events resource
+Headers -> 
+    content-type: application/json
+    authorization: "Basic token" 
+Body -> It expects a JSON structure as follows
+{ 
+  event_name_or_id
+}

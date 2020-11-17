@@ -40,6 +40,8 @@ defmodule RestApiWeb.Router do
     # post "/login", AdminController, :adminLogin
     post "event/add", AdminController, :addNewEvent
     get "event/list/", AdminController, :listAllEvents
+    put "event/update", AdminController, :updateAnEvent
+    delete "event/delete", AdminController, :deleteAnEvent
   end
   
 
@@ -59,6 +61,7 @@ defmodule RestApiWeb.Router do
     get "event/rsvp_cancelled_counts/:event_name_or_id", EventController, :getCancelledRSVPCountsForEvent
     post "user/add_user_to_event/", EventController, :addUserToEvent
     post "user/remove_user_from_event/", EventController, :removeUserFromEvent
+    delete "user/events/remove", EventController, :removeCurrentUserFromEvent
     get "events/users/list/:event_name_or_id", EventController, :listInterestedUsersForEvent
     get "events/cancelled_users/list/:event_name_or_id", EventController, :listOfCancelledUsersForEvent
     get "user/calendar/:email", UserController, :getListOfEventsForUser

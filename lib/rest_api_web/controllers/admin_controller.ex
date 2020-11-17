@@ -36,4 +36,20 @@ defmodule RestApiWeb.AdminController do
             {:ok, []} -> send_resp(conn, 200, "There are no events in the database yet !")
         end
     end
+
+    def updateAnEvent(conn, params) do
+        case ApiContext.updateAnEvent(params) do
+            {:ok, updatedEvent} -> render(conn, "event.json", event: updatedEvent)
+
+            {:error, reason} -> send_resp(conn, 500, reason)
+        end
+    end
+
+    def deleteAnEvent(conn, params) do
+        case ApiContext.deleteAnEvent(params) do
+            :ok -> send_resp(conn, 200, "Deleted Event successfully !")
+
+            {:error, reason} -> send_resp(conn, 500, reason)
+        end
+    end
 end

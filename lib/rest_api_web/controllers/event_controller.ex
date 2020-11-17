@@ -16,6 +16,14 @@ defmodule RestApiWeb.EventController do
         end
     end
 
+    def removeCurrentUserFromEvent(conn, params) do
+        currentUser = Guardian.Plug.current_resource(conn)
+        case ApiContext.removeUserAssociationFromEvent(currentUser, params) do
+            :ok -> send_resp(conn, 200, "User with email Id #{currentUser.email} has been removed from the event !")                
+            {:error, reason} -> send_resp(conn, 500, reason)
+        end
+    end
+
     def removeUserFromEvent(conn, params) do
        emailId = params["email"]
        case ApiContext.checkIfUserExists(emailId) do

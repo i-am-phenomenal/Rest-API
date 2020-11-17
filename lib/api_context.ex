@@ -28,6 +28,50 @@ defmodule ApiContext do
         Repo.one(eventQuery)
     end
 
+    defp getEventDetails(eventVal) when is_number(eventVal) do
+        query = 
+            from event in Event,
+            where: event.id == ^eventVal,
+            select: event
+
+        Repo.one(query)
+    end
+
+    defp getEventDetails(eventVal) when is_binary(eventVal) do
+        case Integer.parse(eventVal) do
+            :error -> 
+                getEventByEventName(eventVal)
+            {parsedId, _} -> 
+                getEventDetails(parsedId)
+        end
+    end
+
+    defp getUserEventAssociation(eventId, userId) do
+        query =
+            from userEventRelationship in UserEventRelationship,
+            where: userEventRelationship.eventId == ^eventId and userEventRelationship.userId == ^userId,
+            select: userEventRelationship
+
+        Repo.one(query)
+    end
+
+    def removeUserAssociationFromEvent(currentUser, params) do
+        nameOrId = params["event_name_or_id"]
+        eventDetails = getEventDetails(nameOrId)
+        if is_nil(eventDetails) do
+            {:error, "Event does not exist"}
+        else
+            case getUserEventAssociation(eventDetails.id, currentUser.id) do
+                nil -> 
+                    {:error, "Association between #{currentUser.fullName} and #{eventDetails.eventName} does not exist"}
+    
+                userEventRelationship -> 
+                    Repo.delete(userEventRelationship)
+                    :ok
+            end
+        end
+    end
+
     def removeUserFromEvent(params) do
        userId = getUserIdByEmail(params["email"]) 
        eventId = getEventIdByEventName(String.trim(params["eventName"]))
@@ -265,6 +309,111 @@ defmodule ApiContext do
 
     def getAllEventsForAdmin() do
         {:ok, Event |> Repo.all()}
+    end
+
+    defp fetchEventDetailsIfExists(eventName) do
+        query = 
+            from event in Event,
+            where: event.eventName == ^eventName,
+            select: event
+
+        Repo.one(query)
+    end
+
+    defp convertStringKeysToAtom(params) do
+        params
+        |> Enum.reduce(%{}, fn ({key, val}, acc) -> 
+            Map.put(acc, String.to_atom(key), val) 
+        end)
+    end
+
+    defp getUpdatedEventDate(params) do
+        if Map.has_key?(params, :eventDate) do
+            params = Map.put(params, :eventDate, getConvertedEventDate(params.eventDate))
+        else
+            params
+        end
+    end
+
+    def updateAnEvent(params) do
+        event = 
+            params["eventName"]
+            |> String.trim()
+            |> fetchEventDetailsIfExists()
+
+        case event do 
+            nil -> 
+                {:error, "The event does not exist !"}
+
+            event -> 
+                params = Map.put(params, "updated_at", currentTime())
+                params = convertStringKeysToAtom(params)
+                params = getUpdatedEventDate(params)
+                changeset = Event.changeset(event, params)
+                event
+                |> Event.changeset(params)
+                |> Repo.update()
+
+                {:ok, Repo.get_by(Event, id: event.id)}
+        end
+    end
+
+    defp getEventByEventName(eventName) do
+        query = 
+            from event in Event,
+            where: event.eventName == ^eventName,
+            select: event
+
+        Repo.one(query)
+    end
+
+    defp removeEventAssociationFromUserEventRelationship(eventId) when is_binary(eventId) do
+        {parsedEventId, _} = Integer.parse(eventId)
+        query = 
+            from userEventRelationship in UserEventRelationship,
+            where: userEventRelationship.eventId == ^parsedEventId
+
+        Repo.delete_all(query)
+    end
+
+    defp removeEventAssociationFromUserEventRelationship(eventId) when is_number(eventId) do
+        query = 
+            from userEventRelationship in UserEventRelationship,
+            where: userEventRelationship.eventId == ^eventId
+
+        Repo.delete_all(query)
+    end
+
+    def deleteAnEvent(params) do
+        nameOrId = params["event_name_or_id"]
+        if is_number(nameOrId) do
+            removeEventAssociationFromUserEventRelationship(nameOrId)
+            Repo.get_by(Event, id: nameOrId)
+            |> Repo.delete()
+            :ok
+        else
+            case Integer.parse(nameOrId) do
+                :error -> 
+                    event = 
+                        nameOrId
+                        |> String.trim
+                        |> getEventByEventName()
+    
+                    case event do
+                        nil -> 
+                            {:error, "Event does not exist !"}
+                        event -> 
+                            removeEventAssociationFromUserEventRelationship(event.id)
+                            Repo.delete(event)
+                            :ok
+                    end
+                {parsedEventId, _} -> 
+                    removeEventAssociationFromUserEventRelationship(parsedEventId)
+                    Repo.get_by(Event, id: parsedEventId)
+                    |> Repo.delete()
+                    :ok
+            end
+        end
     end
 
     def addNewEvent(params) do
