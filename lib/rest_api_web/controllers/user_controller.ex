@@ -112,4 +112,12 @@ defmodule RestApiWeb.UserController do
                 send_resp(conn, 500, "User with email #{emailId} does not exist")
         end
     end
+
+    def updateCurrentUserDetails(conn, params) do
+        currentUser = Guardian.Plug.current_resource(conn)
+        case ApiContext.updateCurrentUserDetails(currentUser, params) do
+            {:ok, user} -> render(conn, "user.json", user: user)
+            _ -> send_resp(conn, 500, "Error")
+        end
+    end
 end

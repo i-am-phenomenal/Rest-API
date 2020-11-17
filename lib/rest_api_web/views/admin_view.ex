@@ -40,4 +40,14 @@ defmodule RestApiWeb.AdminView do
             shortDesc: topic.shortDesc
         }
     end
+
+    def render("all_topics.json", %{topics: topics}) do
+        topics
+        |> Enum.map(fn topic -> 
+            %{
+                topicName: topic.topicName,
+                shortDesc: topic.shortDesc
+            }
+        end)
+    end
 end

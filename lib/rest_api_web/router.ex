@@ -45,7 +45,7 @@ defmodule RestApiWeb.Router do
     
     post "topic/add", AdminController, :addTopicOfInterest
     put "topic/update", AdminController, :updateTopicOfInterest
-
+    get "topic/list", AdminController, :getAllTopics
     delete "topic/delete", AdminController, :deleteTopicOfInterest
   end
   
@@ -55,7 +55,7 @@ defmodule RestApiWeb.Router do
     get "protected", PageController, :protected
     get "get_all_users", UserController, :getAllUsers
     get "get_all_topics", TopicController, :getAllTopics
-    # put "user/update", UserController, 
+    put "user/update", UserController, :updateCurrentUserDetails
     put "update_user", UserController, :updateUserDetails
     delete "delete_user/", UserController, :deleteUserByEmailId
     post "users/topic_of_interest/", UserController, :addTopicOfInterest

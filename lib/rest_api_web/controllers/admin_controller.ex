@@ -77,4 +77,14 @@ defmodule RestApiWeb.AdminController do
             {:error, reason} -> send_resp(conn, 500, reason)
         end
     end
+
+    def getAllTopics(conn, _) do
+        case ApiContext.getAllTopics() do
+            {:ok, topics} -> render(conn, "all_topics.json", topics: topics)
+
+            {:ok, []} -> send_resp(conn, 200, "There are no topics")
+
+            {:error, reason} -> send_resp(conn, 500, reason)
+        end
+    end
 end

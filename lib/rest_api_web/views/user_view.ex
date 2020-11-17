@@ -7,6 +7,16 @@ defmodule RestApiWeb.UserView do
         |> Map.drop([:__meta__, :topics_of_interests])
     end
 
+    def render("user.json", %{user: user}) do
+        %{
+            userId: user.id,
+            fullName: user.fullName, 
+            age: user.age,
+            email: user.email,
+            password: user.password
+        }
+    end
+
     def render("all_events.json", %{allEvents: allEvents, emailId: emailId}) do
         formattedEvents = 
             allEvents

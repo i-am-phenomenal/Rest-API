@@ -773,6 +773,22 @@ defmodule ApiContext do
         end
     end
 
+    def getAllTopics() do
+        try do
+            {:ok, Repo.all(TopicOfInterest)}
+        catch 
+            exception -> {:error, exception}
+        end
+    end
+
+    def updateCurrentUserDetails(currentUser, params) do
+        currentUser
+        |> User.changeset(convertStringKeysToAtom(params))
+        |> Repo.update
+
+        {:ok, Repo.get_by(User, id: currentUser.id)}
+    end
+
     defp deleteTopicIfExists(topicName) do
         query =
             from topic in TopicOfInterest,
