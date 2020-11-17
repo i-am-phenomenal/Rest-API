@@ -33,4 +33,11 @@ defmodule RestApiWeb.AdminView do
             }
         end)
     end
+
+    def render("topic.json", %{topic: topic}) do
+        %{
+            topicName: topic.topicName,
+            shortDesc: topic.shortDesc
+        }
+    end
 end

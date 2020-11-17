@@ -11,13 +11,6 @@ defmodule RestApi.TopicOfInterest do
         field :id, :integer, primary_key: true
         field :topicName, :string
         field :shortDesc, :binary
-        # field :user_id, :integer
-        # belongs_to :user, User, type: :integer
-        # many_to_many(
-        #     :users,
-        #     User,
-        #     join_through: :users
-        # )
     end
 
     @doc false

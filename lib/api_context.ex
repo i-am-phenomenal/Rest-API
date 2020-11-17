@@ -8,6 +8,7 @@ defmodule ApiContext do
     alias RestApi.UserTopicsRelationship
     alias RestApi.UserEventRelationship
     alias RestApi.Event
+    alias RestApi.Macro
     alias Argon2
 
     defp getUserIdByEmail(email) do
@@ -771,6 +772,29 @@ defmodule ApiContext do
             {:error, "Missing Email or Password field in input"}
         end
     end
+
+    defp topicContainsAllKeys?(params) do
+        Map.has_key?(params, "topicName")  and Map.has_key?(params, "shortDesc")
+    end
+
+    def addTopicOfInterest(%{"topicName" => topicName, "shortDesc" => shortDesc}=params) do
+        topicMap = 
+            convertStringKeysToAtom(params)
+            |> Map.put(:inserted_at, currentTime())
+            |> Map.put(:updated_at, currentTime())
+        
+        Repo.insert(
+            TopicOfInterest.changeset(%TopicOfInterest{}, topicMap)
+        )
+
+        {:ok, Repo.get_by(TopicOfInterest, topicName: topicMap.topicName)}
+    end
+
+    def addTopicOfInterest(params) when map_size(params) < 2 do
+        {:error, "One or more fields are missing !"}
+    end
+
+    def addTopicOfInterest(_), do: {:error, "Error"}
 
     def addTopicOfInterestForUser(topicId, userId) do
         try do 

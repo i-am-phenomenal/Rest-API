@@ -52,4 +52,12 @@ defmodule RestApiWeb.AdminController do
             {:error, reason} -> send_resp(conn, 500, reason)
         end
     end
+
+    def addTopicOfInterest(conn, params) do
+        case ApiContext.addTopicOfInterest(params) do
+            {:ok, addedTopic} -> render(conn, "topic.json", topic: addedTopic)
+
+            {:error, reason} -> send_resp(conn, 500, reason)
+        end
+    end
 end
