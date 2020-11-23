@@ -529,6 +529,20 @@ defmodule ApiContext do
         end
     end
 
+    def addNewTopicOfInterest(%{"topic_name" => topicName, "short_desc" => shortDesc} = params) do
+        if checkIfTopicAlreadyPresent?(String.downcase(topicName)) do
+            {:error, "Topic Already Present"}  
+        else 
+            %TopicOfInterest{
+                topicName: topicName,
+                shortDesc: shortDesc
+            }
+            |> Repo.insert()
+
+            :ok
+        end
+    end
+
     def addNewTopicOfInterest(params) do
         if checkIfAllFieldsArePresent?(params) do
             case checkIfTopicAlreadyPresent?(String.downcase(params["topic_name"])) do

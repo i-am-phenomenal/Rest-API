@@ -9,6 +9,7 @@ defmodule RestApiWeb.Router do
 
   pipeline :auth do
     plug RestApi.Pipeline
+    plug :print_hello
   end
 
   pipeline :ensure_auth do
@@ -77,8 +78,9 @@ defmodule RestApiWeb.Router do
     post "user/add_topic/:topic_name_or_id", TopicController, :addTopicOfInterestForCurrentUser
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", RestApiWeb do
-  #   pipe_through :api
-  # end
+  
+  defp print_hello(conn, opts) do
+    IO.inspect("HELLOO 111111111111111111111111111")
+    conn
+  end
 end
