@@ -529,24 +529,22 @@ defmodule ApiContext do
         end
     end
 
-    def addNewTopicOfInterest(params) do
-        if checkIfAllFieldsArePresent?(params) do
-            case checkIfTopicAlreadyPresent?(String.downcase(params["topic_name"])) do
-                true -> 
-                    {:error, "Topic Already present"}
-                false -> 
-                    %TopicOfInterest{
-                        topicName: params["topic_name"],
-                        shortDesc: params["short_desc"]
-                    }
-                    |> Repo.insert()
-                    :ok
-            end
-        else 
-            {:error, "Invalid format for Params. One or more required fields are missing !"}
+    def addNewTopicOfInterest(%{"topic_name" => topicName, "short_desc" => desc}=params) do
+        case checkIfTopicAlreadyPresent?(String.downcase(params["topic_name"])) do
+            true -> 
+                {:error, "Topic Already present"}
+            false -> 
+                %TopicOfInterest{
+                    topicName: params["topic_name"],
+                    shortDesc: params["short_desc"]
+                }
+                |> Repo.insert()
+                :ok
         end
     end
 
+    def addNewTopicOfInterest(_), do: {:error, "Invalid format for Params. One or more required fields are missing !"}
+ 
     defp checkIfTopicPresentById?(topicId) do
         case Repo.get_by(TopicOfInterest, id: topicId) do
             nil -> false
@@ -893,6 +891,35 @@ defmodule ApiContext do
     def addTopicOfInterest(params) when map_size(params) < 2 do
         {:error, "One or more fields are missing !"}
     end
+
+    def query(%{"userId" => userId}=args) do
+        query = 
+            from userTopicRelationship in UserTopicsRelationship,
+            left_join: topic in TopicOfInterest,
+            on: topic.id == userTopicRelationship.topicId,
+            where: userTopicRelationship.userId == ^userId,
+            select: %{
+                topicName: topic.topicName,
+                shortDesc: topic.shortDesc
+            }
+
+        {:ok, Repo.all(query)}
+    end
+
+    def query(%{"topicId" => topicId} =args) do
+        query = 
+            from userTopicRelationship in UserTopicsRelationship,
+            left_join: user in User,
+            on: user.id == userTopicRelationship.userId,
+            where: userTopicRelationship.topicId == ^topicId,
+            select: %{
+                fullName: user.fullName
+            }
+
+        {:ok, Repo.all(query)}
+    end
+
+    def query(_), do: {:error, "Invalid Args"}
 
     def addTopicOfInterest(_), do: {:error, "Error"}
 

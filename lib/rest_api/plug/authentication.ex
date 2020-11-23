@@ -16,8 +16,13 @@ defmodule RestApi.Plug.Authentication do
     defp authenticated?(conn) do
         token = conn |> Plug.Conn.get_req_header("jwt_token") |> List.first()
         try do
-            {:ok, claims} =     RestApi.Guardian.decode_and_verify(token)
-            claims
+            case RestApi.Guardian.decode_and_verify(token) do
+                {:ok, claims} -> 
+                    claims
+                {:error, _} -> 
+                    send_resp(conn, 200, "Invalid Credentials")
+            end
+            
         catch
             exception -> 
                 conn

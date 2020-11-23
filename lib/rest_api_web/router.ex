@@ -75,6 +75,7 @@ defmodule RestApiWeb.Router do
     post "user/add_event_to_my_list/", UserController, :addEventToMyList
     get "user/get_my_topics/", TopicController, :getCurrentUserTopicsOfInterests
     post "user/add_topic/:topic_name_or_id", TopicController, :addTopicOfInterestForCurrentUser
+    post "user/testFunction", UserController, :testFunction
   end
 
   # Other scopes may use custom stacks.

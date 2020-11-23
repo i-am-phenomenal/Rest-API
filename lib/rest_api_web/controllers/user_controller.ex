@@ -120,4 +120,15 @@ defmodule RestApiWeb.UserController do
             _ -> send_resp(conn, 500, "Error")
         end
     end
+
+    def testFunction(conn, %{"userId" => userId}=params) do
+        case ApiContext.query(params) do
+            {:ok, users} ->
+                    IO.inspect(users, label: "333333333333333333333")
+                    send_resp(conn, 200, "Ok")
+
+            {:error, reason} -> 
+                    send_resp(conn, 500, reason)
+        end
+    end
 end
