@@ -20,6 +20,42 @@ defmodule ApiContext do
         Repo.one(userQuery)
     end
 
+    defp checkIfEventExists(eventName) when is_binary(eventName) do
+        case Repo.get_by(Event, eventName: eventName) do
+            nil ->  false
+            val ->  true
+        end
+    end
+
+    defp checkIfEventExists(eventId) when is_number(eventId) do
+        case Repo.get_by(Event, id: eventId) do
+            nil -> false
+            val -> true
+        end
+    end
+
+    defp checkIfTopicExists(topicName) when is_binary(topicName) do
+        case Repo.get_by(TopicOfInterest, topicName: topicName) do
+            nil -> false
+            val -> true
+        end
+    end
+
+    defp checkIfTopicExists(topicId), when is_number(topicId) do
+        :ok
+    end
+
+    def createTopicEventRelationship(%{"eventId"=> eventId, "topicId" => topicId} = params ) do
+        if checkIfEventExists(eventId) and checkIfTopicExists(topicId) do
+        end
+    end
+
+    def createTopicEventRelationship(%{"eventName" => eventName, "topicName" => topicName } = params) do
+        :ok
+    end
+
+    def createTopicEventRelationship(_),  do: {:error, "Invalid Params passed"}
+
     def getEventIdByEventName(eventName) do
         eventQuery = 
             from event in Event,

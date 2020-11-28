@@ -81,7 +81,6 @@ defmodule RestApiWeb.AdminController do
     def getAllTopics(conn, _) do
         case ApiContext.getAllTopics() do
             {:ok, topics} -> 
-                IO.inspect(topics, label: "222222222222222222")
                 render(conn, "all_topics.json", topics: topics)
 
             {:ok, []} -> send_resp(conn, 200, "There are no topics")
