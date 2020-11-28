@@ -2,6 +2,8 @@ defmodule RestApi.Event do
     use Ecto.Schema
     import Ecto.Changeset
 
+    alias RestApi.TopicOfInterest
+
     alias RestApi.Repo
 
     @primary_key false
@@ -15,6 +17,9 @@ defmodule RestApi.Event do
         field :eventLocation, :string
         field :eventName, :string
 
+        # field :topic_of_interest_id, TopicOfInterest
+        
+        # belongs_to :topic_of_interest_id, TopicOfInterest, type: :string
         timestamps()
     end
 

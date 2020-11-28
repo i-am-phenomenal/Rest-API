@@ -11,6 +11,8 @@ defmodule RestApi.TopicOfInterest do
         field :id, :integer, primary_key: true
         field :topicName, :string
         field :shortDesc, :binary
+        
+        # has_many :event, RestApi.Event, references: :id
     end
 
     @doc false

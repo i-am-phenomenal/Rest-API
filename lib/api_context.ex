@@ -773,7 +773,11 @@ defmodule ApiContext do
 
     def getAllTopics() do
         try do
-            {:ok, Repo.all(TopicOfInterest)}
+            {:ok, 
+            TopicOfInterest
+            |> preload(:events)
+            |> Repo.all()
+        }
         catch 
             exception -> {:error, exception}
         end
