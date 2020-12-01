@@ -16,10 +16,10 @@ defmodule RestApi.Importer do
         seedUser()
         seedUserEventRelationships()
         seedUserTopicRelationships()
-        addMoreUserTopicRelationships()
+        addMoreUserEventRelationships()
     end
 
-    defp addMoreUserTopicRelationships() do
+    defp addMoreUserEventRelationships() do
         [
             %{
                 eventId: 10,
@@ -48,73 +48,77 @@ defmodule RestApi.Importer do
         [
             %{
                 userId: 1,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 1,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 1,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 1,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 1,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 1,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 1,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 2,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 2,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 2,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 2,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 2,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 3,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 3,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 3,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             },
             %{
                 userId: 3,
-                topicId: Enum.random(0..20),
+                topicId: Enum.random(0..10),
             }
         ]
         |> Enum.map(fn userTopicMap -> 
-            Repo.insert(
-                UserTopicsRelationship.changeset(%UserTopicsRelationship{}, userTopicMap)
-            )
+            case Repo.get_by(UserTopicsRelationship, userId: userTopicMap.userId, topicId: userTopicMap.topicId) do
+                nil -> Repo.insert(
+                    UserTopicsRelationship.changeset(%UserTopicsRelationship{}, userTopicMap)
+                )
+                _ -> 
+                    nil
+            end
         end)
     end
 
@@ -244,7 +248,8 @@ defmodule RestApi.Importer do
             "Sewing",
             "Skeying",
             "Acting",
-            "Filmmaking"
+            "Filmmaking",
+            "Coding"
         ]
         |> Enum.map(fn topicName -> 
             changeset = TopicOfInterest.changeset(%TopicOfInterest{}, %{
