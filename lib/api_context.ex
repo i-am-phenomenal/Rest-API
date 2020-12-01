@@ -6,9 +6,10 @@ defmodule ApiContext do
     alias RestApi.User
     alias RestApi.TopicOfInterest
     alias RestApi.UserTopicsRelationship
+    alias RestApi.TopicEventRelationship
     alias RestApi.UserEventRelationship
     alias RestApi.Event
-    alias RestApi.Macro
+    import RestApi.Macro
     alias Argon2
 
     defp getUserIdByEmail(email) do
@@ -41,13 +42,34 @@ defmodule ApiContext do
         end
     end
 
-    defp checkIfTopicExists(topicId), when is_number(topicId) do
-        :ok
+    defp checkIfTopicExists(topicId) when is_number(topicId) do
+        case Repo.get_by(TopicOfInterest, id: topicId) do
+            nil -> false
+            val -> true
+        end
     end
 
-    def createTopicEventRelationship(%{"eventId"=> eventId, "topicId" => topicId} = params ) do
+    def createTopicEventRelationship(%{"eventId"=> eventId, "topicId" => topicId} = params )
+        when topicEventRelationshipDoesNotExist(
+            Repo.get_by(TopicEventRelationship, eventId: eventId, topicId: topicId)
+        ) 
+        do
         if checkIfEventExists(eventId) and checkIfTopicExists(topicId) do
+            TopicEventRelationship.changeset(%TopicEventRelationship{}, %{
+                eventId: eventId,
+                topicId:  topicId
+            })
+            |> Repo.insert()
+        else
+            {:error, "Topic or Event does not exist !"}
         end
+    end
+
+    def createTopicEventRelationship(
+        %{"eventName" => eventName, "topicName" => topicName} = params
+    ) 
+    when topicEventRelationshipDoesNotExist(topicName, eventName) do
+        :ok
     end
 
     def createTopicEventRelationship(%{"eventName" => eventName, "topicName" => topicName } = params) do
