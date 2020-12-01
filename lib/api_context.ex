@@ -49,31 +49,61 @@ defmodule ApiContext do
         end
     end
 
-    def createTopicEventRelationship(%{"eventId"=> eventId, "topicId" => topicId} = params )
-        when topicEventRelationshipDoesNotExist(
-            Repo.get_by(TopicEventRelationship, eventId: eventId, topicId: topicId)
-        ) 
-        do
-        if checkIfEventExists(eventId) and checkIfTopicExists(topicId) do
-            TopicEventRelationship.changeset(%TopicEventRelationship{}, %{
-                eventId: eventId,
-                topicId:  topicId
-            })
-            |> Repo.insert()
-        else
-            {:error, "Topic or Event does not exist !"}
+    defp insertTopicEventRelationship(topicId, eventId) do
+        TopicEventRelationship.changeset(%TopicEventRelationship{}, %{
+            eventId: eventId,
+            topicId:  topicId
+        })
+        |> Repo.insert()
+        :ok
+    end
+
+    defp topicEventRelationshipDoesNotExist(eventId, topicId) do
+        case Repo.get_by(TopicEventRelationship, eventId: eventId, topicId: topicId) do
+            nil -> true
+            val -> false
         end
     end
 
-    def createTopicEventRelationship(
-        %{"eventName" => eventName, "topicName" => topicName} = params
-    ) 
-    when topicEventRelationshipDoesNotExist(topicName, eventName) do
-        :ok
+    def createTopicEventRelationship(%{"eventId"=> eventId, "topicId" => topicId} = params )do
+        case topicEventRelationshipDoesNotExist(eventId, topicId) do
+            true -> 
+                if checkIfEventExists(eventId) and checkIfTopicExists(topicId) do
+                    insertTopicEventRelationship(topicId, eventId)
+                else 
+                    {:error, "Topic or Event does not exist !"}
+                end
+            false -> 
+                {:error, "Topic Event relationship already exists !"}
+        end
     end
 
     def createTopicEventRelationship(%{"eventName" => eventName, "topicName" => topicName } = params) do
-        :ok
+        if checkIfEventExists(eventName) and checkIfTopicExists(topicName) do
+            topicId = getTopicByTopicName(topicName).id
+            eventId = getEventByEventName(eventName).id
+            insertTopicEventRelationship(topicId, eventId)
+        else 
+            {:error, "Event or Topic does not exist !"}
+        end
+    end
+
+    def createTopicEventRelationship(%{"eventName" => eventName, "topicId" => topicId}=params) do
+        if checkIfEventExists(eventName) and checkIfTopicExists(topicId) do
+            eventId = getEventByEventName(eventName).id
+            insertTopicEventRelationship(topicId, eventId)
+        else
+            {:error, "Event or Topic does not exist !"}
+        end
+    end
+
+    def createTopicEventRelationship(%{"eventId" => eventId, "topicName" => topicName} = params) do
+        if checkIfEventExists(eventId) and checkIfTopicExists(topicName) do
+            topicId = getTopicByTopicName(topicName).id
+            insertTopicEventRelationship(topicId, eventId)
+        else
+            {:error, "Event or Topic does not exist !"}
+        end
     end
 
     def createTopicEventRelationship(_),  do: {:error, "Invalid Params passed"}
