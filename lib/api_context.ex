@@ -76,6 +76,128 @@ defmodule ApiContext do
         Repo.all(query)
     end
 
+    defp getTopicEventRelationship(topicId, eventId) do
+        query = 
+            from topicEventRelationship in TopicEventRelationship,
+            left_join: topic in TopicOfInterest,
+            on: topicEventRelationship.topicId == topic.id,
+            left_join: event in Event,
+            on: event.id == topicEventRelationship.eventId,
+            where: topicEventRelationship.topicId == ^topicId and topicEventRelationship.eventId == ^eventId,
+            select: %{
+                topic: topic,
+                event: event
+            }
+
+        Repo.all(query)
+    end
+
+    def deleteTopicEventAssociation(eventId, topicId) do
+        query = 
+            from topicEventRelationship in TopicEventRelationship,
+            where: topicEventRelationship.topicId == ^topicId and topicEventRelationship.eventId == ^eventId
+
+        query
+        |> Repo.delete()
+
+        :ok
+    end
+
+    defp deleteTopicEventRelationshipByEventName(eventName) do
+        eventId = getEventByEventName(eventName).id
+
+        query = 
+            from topicEventRelationship in TopicEventRelationship,
+            where: topicEventRelationship.eventId == ^eventId
+
+        query
+        |> Repo.delete_all()
+
+        :ok
+    end
+
+    defp deleteTopicEventRelationshipByEventId(eventId) do
+        query = 
+            from topicEventRelationship in TopicEventRelationship,
+            where: topicEventRelationship.eventId == ^eventId
+
+        query
+        |> Repo.delete_all()
+
+        :ok
+    end
+
+    defp deleteTopicEventRelationshipByTopicName(topicName) do
+        topicId = getTopicByTopicName(topicName).id
+
+        query = 
+            from topicEventRelationship in TopicEventRelationship, 
+            where: topicEventRelationship.topicId == ^topicId
+
+        query
+        |> Repo.delete_all()
+        
+        :ok
+    end
+
+    defp deleteTopicEventRelationshipId(topicId) do
+        query = 
+            from topicEventRelationship in TopicEventRelationship,
+            where: topicEventRelationship.topicId == ^topicId
+
+        query
+        |> Repo.delete_all()
+
+        :ok
+    end
+    
+    def deleteTopicUserRelationship(%{"topicId" => topicId}=params) do
+        {convertedTopicId, _} = Integer.parse(topicId)
+        if checkIfTopicExists(convertedTopicId) do
+            {:ok, deleteTopicEventRelationshipId(convertedTopicId)}
+        else
+            {:error, "Topic does not exist !"}
+        end
+    end
+
+    def deleteTopicUserRelationship(%{"topicName" => topicName}=params) do
+        if checkIfTopicExists(topicName) do
+            deleteTopicEventRelationshipByTopicName(topicName)
+        else
+            {:error, "Topic does not exist"}
+        end
+    end
+
+    def deleteTopicUserRelationship(%{"eventId" => eventId} = params) do
+        {convertedEventId, _} = Integer.parse(eventId)
+        if checkIfEventExists(convertedEventId) do
+            deleteTopicEventRelationshipByEventId(convertedEventId)
+        else
+            {:error, "Event does not exist !"}
+        end
+    end
+
+    def deleteTopicEventRelationship(%{"eventName" => eventName}=params) do
+        if checkIfEventExists(eventName) do
+            deleteTopicEventRelationshipByEventName(eventName)
+        else
+            {:error, "Event does not exist !"}
+        end
+    end
+
+    def deleteTopicEventRelationship(%{"eventId" => eventId, "topicId" => topicId} = params) do
+        {convertedTopicId, _} = Integer.parse(topicId)
+        {convertedEventId, _} = Integer.parse(eventId)
+
+        if checkIfEventExists(convertedEventId) and checkIfTopicExists(convertedTopicId) do
+            deleteTopicEventAssociation(convertedEventId, convertedTopicId)
+        else
+            {:error, "Event does not exist !"}
+        end
+    end
+
+    def deleteTopicEventRelationship(_), do: {:error, "Invalid combination of params "}
+
     def getSpecificTopicEventRelationship(%{"topicName" => topicName} = params) do
         if checkIfTopicExists(topicName) do
             {:ok, getTopicEventRelationshipsByTopicName(topicName)}
@@ -109,6 +231,18 @@ defmodule ApiContext do
             {:error, "Event does not exist !"}
         end
     end
+
+    def getSpecificTopicEventRelationship(%{"eventId" => eventId, "topicId" => topicId} = params) do
+        {convertedEventId, _} = Integer.parse(eventId)
+        {convertedTopicId, _} = Integer.parse(topicId)
+        if checkIfEventExists(convertedEventId) and checkIfTopicExists(convertedTopicId) do
+            {:ok, getTopicEventRelationship(convertedTopicId, convertedEventId)}
+        else
+            {:error, "Topic or Event does not exist !"}
+        end
+    end
+
+    def getSpecificTopicEventRelationship(_), do: {:error, "Invalid Params passed !"}
 
     def getAllTopicEventRelationships() do
         query = 

@@ -27,4 +27,12 @@ defmodule RestApiWeb.AdminTopicEventController do
                     send_resp(conn, 500, reason)
         end
     end
+
+    def delete(conn, params) do
+        case ApiContext.deleteTopicUserRelationship(params) do
+            :ok -> send_resp(conn, 200, "Deleted relationship successfully !")
+
+            {:error, reason} -> send_resp(conn, 500, reason)
+        end
+    end
 end
