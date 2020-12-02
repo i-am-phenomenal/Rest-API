@@ -20,9 +20,8 @@ defmodule RestApiWeb.AdminTopicEventController do
 
     def show(conn, params) do
         case ApiContext.getSpecificTopicEventRelationship(params) do
-            {:ok, topicEventRelationship} -> 
-                    IO.inspect(topicEventRelationship, label: "111111111111111")
-                    send_resp(conn, 200, "")
+            {:ok, []} -> send_resp(conn, 200, "No event relationships for the given topic !")
+            {:ok, topicEventRelationship} -> render(conn, "all.json", topicEvents: topicEventRelationship)
 
             {:error, reason} -> 
                     send_resp(conn, 500, reason)

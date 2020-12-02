@@ -12,8 +12,102 @@ defmodule ApiContext do
     import RestApi.Macro
     alias Argon2
 
-    def getSpecificTopicEventRelationship(params) do
-        :ok
+    defp getTopicEventRelationshipByEventName(eventName) do
+        query = 
+            from topicEventRelationship in TopicEventRelationship,
+            left_join: topic in TopicOfInterest,
+            on: topic.id == topicEventRelationship.topicId, 
+            left_join: event in Event, 
+            on: event.id == topicEventRelationship.eventId,
+            where: event.eventName == ^eventName, 
+            select: %{
+                topic: topic,
+                event: event
+            }
+
+        Repo.all(query)
+    end
+
+    defp getTopicEventRelationshipByEventId(eventId) do
+        query = 
+            from topicEventRelationship in TopicEventRelationship, 
+            left_join: topic in TopicOfInterest, 
+            on: topic.id == topicEventRelationship.topicId, 
+            left_join: event in Event,
+            on: event.id == topicEventRelationship.eventId, 
+            where: event.id == ^eventId,
+            select: %{
+                topic: topic, 
+                event: event
+            }
+
+        Repo.all(query)
+    end
+
+    defp getTopicEventRelationshipsByTopicId(topicId) do
+        query = 
+            from topicEventRelationship in TopicEventRelationship,
+            left_join: topic in TopicOfInterest,
+            on: topicEventRelationship.topicId == topic.id,
+            left_join: event in Event,
+            on: topicEventRelationship.eventId == event.id,
+            where: topic.id == ^topicId,
+            select: %{
+                topic: topic,
+                event: event
+            }
+
+        Repo.all(query)
+    end
+
+    defp getTopicEventRelationshipsByTopicName(topicName) do
+        query =
+            from topicEventRelationship in TopicEventRelationship,
+            left_join: topic in TopicOfInterest,
+            on: topicEventRelationship.topicId == topic.id,
+            left_join: event in Event,
+            on: event.id == topicEventRelationship.eventId,
+            where: topic.topicName == ^topicName,
+            select: %{
+                topic: topic,
+                event: event
+            }
+
+        Repo.all(query)
+    end
+
+    def getSpecificTopicEventRelationship(%{"topicName" => topicName} = params) do
+        if checkIfTopicExists(topicName) do
+            {:ok, getTopicEventRelationshipsByTopicName(topicName)}
+        else 
+            {:error, "Topic Does not Exist"}
+        end
+    end
+
+    def getSpecificTopicEventRelationship(%{"topicId" => topicId} = params) do
+        {convertedTopicId, _} = Integer.parse(topicId)
+        if checkIfTopicExists(convertedTopicId) do
+            {:ok, getTopicEventRelationshipsByTopicId(convertedTopicId)}
+        else
+            {:error, "Topic does not exist"}
+        end
+    end
+
+    def getSpecificTopicEventRelationship(%{"eventId" => eventId} =params) do
+        {convertedEventId, _} = Integer.parse(eventId)
+        if checkIfEventExists(convertedEventId) do
+            {:ok, getTopicEventRelationshipByEventId(convertedEventId)}
+        else 
+            {:error, "Event does not exist !"}
+        end
+    end
+
+    def getSpecificTopicEventRelationship(%{"eventName" => eventName} = params) do
+        if checkIfEventExists(eventName) do
+            {:ok, getTopicEventRelationshipByEventName(eventName)}
+        else
+            {:error, "Event does not exist !"}
+        end
     end
 
     def getAllTopicEventRelationships() do
