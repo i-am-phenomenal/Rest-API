@@ -4,14 +4,15 @@ defmodule RestApi.Application do
   @moduledoc false
 
   use Application
-
+  
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
       # Start the Ecto repository
       RestApi.Repo,
       # Start the endpoint when the application starts
-      RestApiWeb.Endpoint
+      RestApiWeb.Endpoint,
+      {Plug.Cowboy, scheme: :http, plug: RestApi.Plug.DummyPlug, options: [port: 8080]}
       # Starts a worker by calling: RestApi.Worker.start_link(arg)
       # {RestApi.Worker, arg},
     ]

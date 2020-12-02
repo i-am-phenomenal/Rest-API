@@ -730,17 +730,35 @@ defmodule ApiContext do
         end
     end
 
-    def addNewTopicOfInterest(%{"topic_name" => topicName, "short_desc" => desc}=params) do
-        case checkIfTopicAlreadyPresent?(String.downcase(params["topic_name"])) do
-            true -> 
-                {:error, "Topic Already present"}
-            false -> 
-                %TopicOfInterest{
-                    topicName: params["topic_name"],
-                    shortDesc: params["short_desc"]
-                }
-                |> Repo.insert()
-                :ok
+    def addNewTopicOfInterest(%{"topic_name" => topicName, "short_desc" => shortDesc} = params) do
+        if checkIfTopicAlreadyPresent?(String.downcase(topicName)) do
+            {:error, "Topic Already Present"}  
+        else 
+            %TopicOfInterest{
+                topicName: topicName,
+                shortDesc: shortDesc
+            }
+            |> Repo.insert()
+
+            :ok
+        end
+    end
+
+    def addNewTopicOfInterest(params) do
+        if checkIfAllFieldsArePresent?(params) do
+            case checkIfTopicAlreadyPresent?(String.downcase(params["topic_name"])) do
+                true -> 
+                    {:error, "Topic Already present"}
+                false -> 
+                    %TopicOfInterest{
+                        topicName: params["topic_name"],
+                        shortDesc: params["short_desc"]
+                    }
+                    |> Repo.insert()
+                    :ok
+            end
+        else 
+            {:error, "Invalid format for Params. One or more required fields are missing !"}
         end
     end
 
