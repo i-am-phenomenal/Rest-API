@@ -133,7 +133,7 @@ defmodule ApiContext do
         query = 
             from topicEventRelationship in TopicEventRelationship, 
             where: topicEventRelationship.topicId == ^topicId
-            
+
         query
         |> Repo.delete_all()
         
@@ -152,7 +152,21 @@ defmodule ApiContext do
     end
 
     defp checkIfRelationshipExistsForEvent(eventId) when is_number(eventId) do
-        :ok
+        query = 
+            from topicEventRelationship in TopicEventRelationship,
+            where: topicEventRelationship.eventId == ^eventId
+
+        Repo.exists?(query)
+    end
+
+    defp checkIfRelationshipExistsForEvent(eventName) when is_binary(eventName) do
+        query =  
+            from event in Event,
+            left_join: topicEventRelationship in TopicEventRelationship,
+            on: topicEventRelationship.eventId == event.id,
+            where: event.eventName == ^eventName
+
+        Repo.exists?(query)
     end
 
     defp checkIfRelationshipExistsForTopic(topicId) when is_number(topicId) do
@@ -192,7 +206,7 @@ defmodule ApiContext do
 
     def deleteTopicEventRelationship(%{"eventId" => eventId} = params) do
         {convertedEventId, _} = Integer.parse(eventId)
-        if checkIfEventExists(convertedEventId) and checkIfRelationshipExistsForEvent(eventId)  do
+        if checkIfEventExists(convertedEventId) and checkIfRelationshipExistsForEvent(convertedEventId)  do
             deleteTopicEventRelationshipByEventId(convertedEventId)
         else
             {:error, "Event does not exist !"}
@@ -200,7 +214,7 @@ defmodule ApiContext do
     end
 
     def deleteTopicEventRelationship(%{"eventName" => eventName}=params) do
-        if checkIfEventExists(eventName) do
+        if checkIfEventExists(eventName) and checkIfRelationshipExistsForEvent(eventName) do
             deleteTopicEventRelationshipByEventName(eventName)
         else
             {:error, "Event does not exist !"}

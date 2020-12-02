@@ -8,6 +8,7 @@ defmodule RestApi.Importer do
     alias RestApi.Event
     alias RestApi.UserEventRelationship
     alias RestApi.UserTopicsRelationship
+    alias RestApi.TopicEventRelationship
     alias Argon2
 
     def seedData() do
@@ -17,6 +18,21 @@ defmodule RestApi.Importer do
         seedUserEventRelationships()
         seedUserTopicRelationships()
         addMoreUserEventRelationships()
+        addTopicEventRelationships()
+    end
+
+    defp addTopicEventRelationships() do
+        (0..30)
+        |> Enum.map(fn iter -> 
+            topicEventRelationshipMap = 
+                %{
+                    topicId: Enum.random(1..10),
+                    eventId: Enum.random(1..10)
+                }
+            
+            TopicEventRelationship.changeset(%TopicEventRelationship{}, topicEventRelationshipMap)
+            |> Repo.insert()
+        end)
     end
 
     defp addMoreUserEventRelationships() do

@@ -84,6 +84,8 @@ defmodule RestApiWeb.Router do
     get "user/get_my_topics/", TopicController, :getCurrentUserTopicsOfInterests
     post "user/add_topic/:topic_name_or_id", TopicController, :addTopicOfInterestForCurrentUser
     post "user/testFunction", UserController, :testFunction
+
+    post "topic_event/my_events", TopicEventController , :addUserTopicToEvent
   end
 
   
