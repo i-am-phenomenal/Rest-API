@@ -54,6 +54,7 @@ defmodule RestApiWeb.Router do
     get "topic_event/get_all/", AdminTopicEventController, :index
     get "/topic_event/get_specific", AdminTopicEventController, :show
     delete "/topic_event/delete", AdminTopicEventController, :delete
+    delete "topic_event/update", AdminTopicEventController, :update
   end
   
 

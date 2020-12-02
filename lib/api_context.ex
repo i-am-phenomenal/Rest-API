@@ -133,7 +133,7 @@ defmodule ApiContext do
         query = 
             from topicEventRelationship in TopicEventRelationship, 
             where: topicEventRelationship.topicId == ^topicId
-
+            
         query
         |> Repo.delete_all()
         
@@ -150,27 +150,49 @@ defmodule ApiContext do
 
         :ok
     end
+
+    defp checkIfRelationshipExistsForEvent(eventId) when is_number(eventId) do
+        :ok
+    end
+
+    defp checkIfRelationshipExistsForTopic(topicId) when is_number(topicId) do
+        query =
+            from topicEventRelationship in TopicEventRelationship,
+            where: topicEventRelationship.topicId == ^topicId
+
+        Repo.exists?(query)
+    end
+
+    defp checkIfRelationshipExistsForTopic(topicName) when is_binary(topicName) do
+            query = 
+                from topic in TopicOfInterest,
+                left_join: topicEventRelationship in TopicEventRelationship,
+                on: topicEventRelationship.topicId == topic.id,
+                where: topic.topicName == ^topicName
+
+            Repo.exists?(query)
+    end
     
-    def deleteTopicUserRelationship(%{"topicId" => topicId}=params) do
+    def deleteTopicEventRelationship(%{"topicId" => topicId}=params) do
         {convertedTopicId, _} = Integer.parse(topicId)
-        if checkIfTopicExists(convertedTopicId) do
-            {:ok, deleteTopicEventRelationshipId(convertedTopicId)}
+        if checkIfTopicExists(convertedTopicId) and checkIfRelationshipExistsForTopic(convertedTopicId) do
+            deleteTopicEventRelationshipId(convertedTopicId)
         else
-            {:error, "Topic does not exist !"}
+            {:error, "Topic or Topic Event relationship does not exist !"}
         end
     end
 
-    def deleteTopicUserRelationship(%{"topicName" => topicName}=params) do
-        if checkIfTopicExists(topicName) do
+    def deleteTopicEventRelationship(%{"topicName" => topicName}=params) do
+        if checkIfTopicExists(topicName) and checkIfRelationshipExistsForTopic(topicName) do
             deleteTopicEventRelationshipByTopicName(topicName)
         else
-            {:error, "Topic does not exist"}
+            {:error, "Topic or Topic Event relationship does not exist"}
         end
     end
 
-    def deleteTopicUserRelationship(%{"eventId" => eventId} = params) do
+    def deleteTopicEventRelationship(%{"eventId" => eventId} = params) do
         {convertedEventId, _} = Integer.parse(eventId)
-        if checkIfEventExists(convertedEventId) do
+        if checkIfEventExists(convertedEventId) and checkIfRelationshipExistsForEvent(eventId)  do
             deleteTopicEventRelationshipByEventId(convertedEventId)
         else
             {:error, "Event does not exist !"}
