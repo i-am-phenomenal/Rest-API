@@ -12,6 +12,25 @@ defmodule ApiContext do
     import RestApi.Macro
     alias Argon2
 
+    def getSpecificTopicEventRelationship(params) do
+        :ok
+    end
+
+    def getAllTopicEventRelationships() do
+        query = 
+            from topicEventRelationship in TopicEventRelationship,
+            left_join: topic in TopicOfInterest,
+            on: topicEventRelationship.topicId == topic.id,
+            left_join: event in Event,
+            on: topicEventRelationship.eventId == event.id,
+            select: %{
+                topic: topic,
+                event: event
+            }
+
+        {:ok, Repo.all(query)}
+    end
+
     defp getUserIdByEmail(email) do
         userQuery = 
             from user in User,
