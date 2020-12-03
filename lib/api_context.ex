@@ -12,6 +12,74 @@ defmodule ApiContext do
     import RestApi.Macro
     alias Argon2
 
+    defp userRelatedToTopic(userId, topicId) when is_number(topicId) do
+        query = 
+            from userTopicRelationship in UserTopicsRelationship,
+            where: userTopicRelationship.userId == ^userId and userTopicRelationship.topicId == ^topicId
+
+        Repo.exists?(query)
+    end
+
+    defp userRelatedToTopic(userId, topicName) when is_binary(topicName) do
+        query = 
+            from topic in TopicOfInterest,
+            left_join: userTopicRelationship in UserTopicsRelationship,
+            on: userTopicRelationship.topicId == topic.id and userTopicRelationship.userId == ^userId,
+            where: topic.topicName == ^topicName
+
+        Repo.exists?(query)
+    end
+
+    defp addTopicEventRelationshipForGivenUser(eventId, topicId)
+        when is_number(topicId) and is_number(eventId) do
+        topicEventRelationshipMap = %{
+            topicId: topicId,
+            eventId: eventId
+        }
+        TopicEventRelationship.changeset(%TopicEventRelationship{}, topicEventRelationshipMap)
+        |> Repo.insert()
+    end
+
+    defp addTopicEventRelationshipForGivenUser(eventName, topicName) 
+        when is_binary(eventName) and is_binary(topicName) do
+            topicId = getTopicByTopicName(topicName).id
+            eventId = getEventByEventName(eventName).id
+
+            topicEventRelationshipMap = %{
+                topicId: topicId,
+                eventId: eventId
+            }
+            TopicEventRelationship.changeset(%TopicEventRelationship{}, topicEventRelationshipMap)
+            |> Repo.insert()
+        end
+
+    defp addUserTopicRelationshipByTopicName(userId, topicName) do
+        topicId = getTopicByTopicName(topicName).id
+        userTopicRelationshipMap = %{
+            topicId: topicId,
+            userId: userId
+        }
+        UserTopicsRelationship.changeset(%UserTopicsRelationship{}, userTopicRelationshipMap)
+        |> Repo.insert()
+    end 
+
+    def addUserTopicToEvent(currentUser, %{"eventId" => eventId, "topicId" => topicId}=params) do
+        if userRelatedToTopic(currentUser.id, topicId) do
+           addTopicEventRelationshipForGivenUser(eventId, topicId)
+        else
+            insertRecordInUserTopicTable(currentUser.id, topicId)
+            addTopicEventRelationshipForGivenUser(eventId, topicId)
+        end
+    end
+
+    def addUserTopicToEvent(currentUser, %{"eventName" => eventName, "topicName" => topicName}=params) do
+        if userRelatedToTopic(currentUser.id, topicName) do
+            addTopicEventRelationshipForGivenUser(eventName, topicName)
+        else
+            addUserTopicRelationshipByTopicName(currentUser.id, topicName)
+        end
+    end
+
     defp getTopicEventRelationshipByEventName(eventName) do
         query = 
             from topicEventRelationship in TopicEventRelationship,

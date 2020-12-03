@@ -1,5 +1,5 @@
 defmodule RestApiWeb.TopicEventController do
-    use RestApiWeb, :controllerro
+    use RestApiWeb, :controller
     alias ApiContext
 
     def addUserTopicToEvent(conn, params) do
